@@ -3,8 +3,7 @@ import pandas as pd
 import boto3
 
 # Imports credentials
-def update_sipsa_file(aws_access_key_id:str, 
-                      aws_secret_access_key:str, 
+def update_sipsa_file(s3: boto3.resource, 
 					  dataframe: pd.DataFrame, 
 					  bucket_name:str = 'sipsatracker', 
 					  file_name:str = 'full_report'): 
@@ -12,8 +11,7 @@ def update_sipsa_file(aws_access_key_id:str,
 	This function updates (delete and upload) the sipsa file hosted on the S3 bucket (AWS). 
 
 	Args:
-		aws_access_key_id (str): AWS credential user.
-		aws_secret_access_key (str): AWS credential password.
+		s3 (boto3.resource): S3 resource created.
 		dataframe (pd.DataFrame): datafarme containing data to be uploaded.
 		bucket_name (str, optional): Bucket name of interest. Defaults to 'sipsatracker'.
 		file_name (str, optional): file to be give to uploaded file. Defaults to 'full_report'.
@@ -22,8 +20,7 @@ def update_sipsa_file(aws_access_key_id:str,
 		None
 
 	Example usage: 
-		update_sipsa_file(	aws_access_key_id = aws_access_key_id, 
-							aws_secret_access_key = aws_secret_access_key, 
+		update_sipsa_file(	s3 = s3,
 							dataframe = dataframe,
 							bucket_name = 'sipsatracker', 
 							file_name = 'full_report')
@@ -32,27 +29,22 @@ def update_sipsa_file(aws_access_key_id:str,
 	csv_buffer = dataframe.to_csv(index=False).encode('utf-8')
 
 	# Creating time stamp
-	today = datetime.today().strftime('%Y-%m-%d')
-
-	# Creating boto3 session (access the S3 bucket)
-	s3 = boto3.resource('s3',
-						aws_access_key_id = aws_access_key_id, 
-						aws_secret_access_key = aws_secret_access_key)
+	# today = datetime.today().strftime('%Y-%m-%d')
 
 	print(f'[info] Connection created successfully')
 	# upload file
-	s3_path =  f'{file_name}_{today}.csv'
+	s3_path =  f'{file_name}.csv'
 
 	# Get the S3 bucket
-	bucket = s3.Bucket(bucket_name)
-	print(f'[info] Resource created successfully. S3 bucket: {bucket_name}.')
+	# bucket = s3.Bucket(bucket_name)
+	# print(f'[info] Resource created successfully. S3 bucket: {bucket_name}.')
 
-	# List all objects in the bucket and retrieve their keys (object names)
-	object_names = [obj.key for obj in bucket.objects.all()]
+	# # List all objects in the bucket and retrieve their keys (object names)
+	# object_names = [obj.key for obj in bucket.objects.all()]
 	
-	# Delete previous file
-	s3.Object(bucket_name, object_names[0]).delete()
-	print(f'[info] {object_names[0]} deleted successfully.')
+	# # Delete previous file
+	# s3.Object(bucket_name, object_names[0]).delete()
+	# print(f'[info] {object_names[0]} deleted successfully.')
 
 	# upload updated file 
 	s3.Object(bucket_name,s3_path).put(Body=csv_buffer)
@@ -62,4 +54,13 @@ def update_sipsa_file(aws_access_key_id:str,
 
 
 
-# s3.Object(bucket_name, s3_path).download_file(Path.cwd())
+# Function to read CSV file from S3 bucket
+def read_csv_from_s3(s3: boto3.resource, bucket_name:str, file_name:str):
+# Get the S3 bucket and object
+    bucket = s3.Bucket(bucket_name)
+    obj = bucket.Object(file_name)
+
+    # Read CSV data from S3 object
+    df = pd.read_csv(obj.get()['Body'])
+    df = df[~((df['anho']==2023)&(df['semana_no']==53))]
+    return df

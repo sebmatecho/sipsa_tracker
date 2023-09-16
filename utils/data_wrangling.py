@@ -8,6 +8,8 @@ import requests
 from bs4 import BeautifulSoup
 import openpyxl
 import warnings
+import boto3
+from typing import List
 
 from matplotlib import pyplot as plt
 import seaborn as sns
@@ -16,7 +18,10 @@ warnings.filterwarnings("ignore")
 
 
 
-def first_format_wrangling(path_list):
+def first_format_wrangling(path_list: List[str],
+                           s3: boto3.resource,
+                           bucket_name: str = 'sipsatracker', 
+                           aws_flag:bool= True):
     # Creating target dataframe
     year_file = pd.DataFrame()
 
@@ -31,14 +36,22 @@ def first_format_wrangling(path_list):
         8: 'productos_procesados'}
 
     # Iterating over list of paths 
+
+    bucket = s3.Bucket(bucket_name)
+
     for file_path in tqdm(path_list):
         
         # Capturing off cases
         try: 
-            # Import data
-            with open(file_path, 'rb') as f: 
-                dataframe = pd.read_excel(f, header = None)
-            
+            if aws_flag: 
+                # Import data
+                obj = bucket.Object(file_path)
+                obj.download_file(Path.cwd()/Path(file_path).name)
+                dataframe = pd.read_excel(Path.cwd()/Path(file_path).name)
+            else:
+                with open(file_path, 'rb') as f: 
+                    dataframe = pd.read_excel(f, header = None)
+
             # Keeping only first five columns and renaming them
             dataframe = dataframe.iloc[:,0:5]
             dataframe.columns = ['ciudad','precio_minimo','precio_maximo','precio_medio', 'tendencia']
@@ -53,7 +66,7 @@ def first_format_wrangling(path_list):
 
             # Get row indexes where the word 'cuadro' is present
             index_cuadro = dataframe[dataframe['ciudad'].str.contains('cuadro')].index
-
+            
             # Creating target dataframe for all data
             df_final= pd.DataFrame()
 

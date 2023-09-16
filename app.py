@@ -1,8 +1,11 @@
 import streamlit as st
 import pandas as pd
+from utils import aws
 from pathlib import Path
 from utils import app_utils
-
+import boto3
+from dotenv import load_dotenv
+import os
 
 
 # pd.read_csv
@@ -14,7 +17,17 @@ st.write('Data compiled from the Colombian National Division of Statistics (DANE
 
 @st.cache_data
 def fetch_and_clean_data():
-    data = pd.read_csv('https://media.githubusercontent.com/media/sebmatecho/sipsa_tracker/master/reports/full_report.csv')
+    load_dotenv()
+    aws_access_key_id = os.environ['aws_access_key_id']
+    aws_secret_access_key = os.environ['aws_secret_access_key']
+    
+    # Creating boto3 session (access the S3 bucket)
+    s3 = boto3.resource('s3',
+                        aws_access_key_id = aws_access_key_id, 
+			aws_secret_access_key = aws_secret_access_key)
+    
+#     data = pd.read_csv('https://media.githubusercontent.com/media/sebmatecho/sipsa_tracker/master/reports/full_report.csv')
+    data = aws.read_csv_from_s3(s3 = s3, bucket_name = 'sipsatracker',file_name = 'full_report.csv')
     return data
 
 dataframe = fetch_and_clean_data()

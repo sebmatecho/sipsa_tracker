@@ -38,7 +38,7 @@ import plotly.express as px
 def product_evolution(dataframe: pd.DataFrame, 
                               product: str):
     # Filter and preprocess data
-    dataframe = dataframe.loc[dataframe['producto']==product, ['anho', 'semana_no', 'precio_medio']].groupby(['anho', 'semana_no']).median().reset_index()
+    dataframe = dataframe.loc[dataframe['producto']==product, ['anho', 'semana_no', 'precio_medio']].groupby(['anho', 'semana_no']).mean().reset_index()
     dataframe['date'] = pd.to_datetime(dataframe['anho'].astype(str) + '-' + dataframe['semana_no'].astype(str) + '-1', format='%Y-%U-%w')
     
     # Calculate the trend line using numpy's polyfit
