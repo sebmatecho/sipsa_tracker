@@ -102,5 +102,5 @@ if figure == 'Product category by region':
 
 ### SIPSA index!
 if figure == 'SIPSA index':
-#     st.text('to be developed!')
+    st.write('This index (named as SIPSA index) refers to the an index based on the SIPSA reported food prices, aiming to anticipate food inflation. Such index was originally proposed [here](https://revistas.usantotomas.edu.co/index.php/estadistica/article/view/5635/5549).')
     app_utils.sipsa_index(dataframe = dataframe)
