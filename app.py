@@ -38,7 +38,10 @@ with st.sidebar:
     figure = st.radio(
               "How you want to track prices?",
               ["Product only", "Product by city", "Product by region", 
-               'Product category only', 'Product category by city', 'Product category by region'])
+               'Product category only', 
+               'Product category by city', 
+               'Product category by region', 
+               'SIPSA index'])
 
 # Visualizing product only 
 if figure == 'Product only':
@@ -95,3 +98,9 @@ if figure == 'Product category by region':
             [x.title() for x in dataframe.region.unique()])
     
     app_utils.all_category_evolution_region(dataframe = dataframe, region = region)
+
+
+### SIPSA index!
+if figure == 'SIPSA index':
+#     st.text('to be developed!')
+    app_utils.sipsa_index(dataframe = dataframe)

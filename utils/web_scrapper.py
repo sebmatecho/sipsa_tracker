@@ -39,13 +39,8 @@ class DataCollector():
         return one_year_links
 
     def creates_folder(self, link:str):
-        """_summary_
-
-        Args:
-            link (str): _description_
-
-        Returns:
-            _type_: _description_
+        """
+        
         """
         # Creating folder name per year  
         if link.text.strip() == 'Mayoristas boletín semanal':

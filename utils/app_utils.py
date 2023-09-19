@@ -38,7 +38,7 @@ import plotly.express as px
 def product_evolution(dataframe: pd.DataFrame, 
                               product: str):
     # Filter and preprocess data
-    dataframe = dataframe.loc[dataframe['producto']==product, ['anho', 'semana_no', 'precio_medio']].groupby(['anho', 'semana_no']).mean().reset_index()
+    dataframe = dataframe.loc[dataframe['producto']==product, ['anho', 'semana_no', 'precio_medio']].groupby(['anho', 'semana_no']).median().reset_index()
     dataframe['date'] = pd.to_datetime(dataframe['anho'].astype(str) + '-' + dataframe['semana_no'].astype(str) + '-1', format='%Y-%U-%w')
     
     # Calculate the trend line using numpy's polyfit
@@ -303,3 +303,68 @@ def all_category_evolution_region(dataframe: pd.DataFrame, region: str):
     st.plotly_chart(fig)
 
     return None
+
+def imputing_outliers(df_final, year, week):
+	index = df_final[(df_final['year']==year)&(df_final['week']==week)].index[0]
+	df_final.loc[index, 'sipsa'] = df_final.loc[index-5:index +5, 'sipsa'].median()
+	return df_final
+
+
+def sipsa_index(dataframe: pd.DataFrame): 
+
+    index_weights =  {'verduras_hortalizas':0.094,
+                        'frutas_frescas':0.050,
+                        'tuberculos_raices_platanos':0.041,
+                        'granos_cereales':0.186,
+                        'huevos_lacteos':0.214,
+                        'carnes':0.237,
+                        'pescados':0.030, 
+                        'productos_procesados':0.148}
+    
+    year_list, week_list, sipsa_index_list = [],[],[]
+
+    # Filter the DataFrame for the desired year and week
+    for year in dataframe['anho'].unique():
+        
+        for week in dataframe.loc[dataframe['anho']==year,'semana_no'].unique():
+            
+            df_filtered = dataframe[(dataframe['anho'] == year) & (dataframe['semana_no'] == week)]
+            # Calculate the weighted sum for each category
+            year_list.append(year)
+            week_list.append(week)
+            sipsa_index_list.append((df_filtered['precio_medio'] * df_filtered['categoria'].map(index_weights)).sum())
+
+    df_final = pd.DataFrame({'year':year_list, 
+                            'week': week_list, 
+                            'sipsa': sipsa_index_list})
+    df_final = df_final.sort_values(['year','week']).reset_index(drop=True)
+
+    # outlier treatment - imputation
+    df_final = imputing_outliers(df_final, year = 2016, week = 12)
+    df_final = imputing_outliers(df_final, year = 2020, week = 18)
+    df_final = imputing_outliers(df_final, year = 2021, week = 18)
+    df_final = imputing_outliers(df_final, year = 2021, week = 19)
+    df_final = imputing_outliers(df_final, year = 2021, week = 20)
+    df_final = imputing_outliers(df_final, year = 2021, week = 48)
+    df_final = imputing_outliers(df_final, year = 2021, week = 49)
+    df_final = imputing_outliers(df_final, year = 2021, week = 50)
+
+    df_final['date'] = pd.to_datetime(df_final['year'].astype(str) + '-' + df_final['week'].astype(str) + '-1', format='%Y-%U-%w')
+    
+    
+    # fig = px.line(df_final.sort_values('date'), x='date', y='sipsa')
+    #######
+    df_final['month'] = df_final['date'].dt.month
+    df_final = df_final[['sipsa','year', 'month']].groupby(['year','month']).median().reset_index()
+    
+    # Calculate the percentual difference
+    df_final['date'] = pd.to_datetime(df_final['year'].astype(str) + '-' + df_final['month'].astype(str), format='%Y-%m')
+    df_final["sipsa_index_percentual"] = df_final["sipsa"].pct_change() * 100
+    fig = px.line(df_final.sort_values('date'), x='date', y='sipsa_index_percentual')
+    
+    # Display the Plotly figure in Streamlit
+    st.plotly_chart(fig)
+    # st.dataframe(df_final.sort_values('date'))
+    return None;
+
+
