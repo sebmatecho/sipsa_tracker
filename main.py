@@ -23,7 +23,7 @@ if __name__ == '__main__':
     start_time = time.perf_counter()
 
     ######## Extracting data ########
-    # web_scrapper.DataCollector(s3 = s3).get_files(bucket_name = 'sipsatracker')
+    web_scrapper.DataCollector(s3 = s3).get_files(bucket_name = 'sipsatracker')
     
     ######### Transforming data ########
     dataframe = data_cleaner.DataWrangler(s3 = s3).building_final_file(bucket_name = 'sipsatracker')

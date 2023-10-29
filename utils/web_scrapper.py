@@ -18,7 +18,7 @@ class DataCollector():
      
     def all_years_links(self) -> List[str]:
         """
-        this method gets the set of links, per year, available
+        This method gets the set of links, per year, available in the DANE webpage
         """
         response = requests.get(self.url, headers = self.headers)
         soup = BeautifulSoup(response.content, "html.parser")
@@ -40,7 +40,8 @@ class DataCollector():
 
     def creates_folder(self, link:str):
         """
-        
+        This method creates local folder structure to host downloaded files
+
         """
         # Creating folder name per year  
         if link.text.strip() == 'Mayoristas boletín semanal':
