@@ -1,0 +1,49 @@
+2024-09-28 15:02:01,975 - INFO - Loaded existing files tracker from S3.
+2024-09-28 15:02:03,934 - INFO - Working on 2024 files
+2024-09-28 15:02:04,320 - INFO - Loaded existing files tracker from S3.
+2024-09-28 15:02:04,568 - INFO - Year 2024 processed: 0 new files uploaded to S3 bucket sipsa-bucket.
+2024-09-28 15:02:05,412 - INFO - Working on 2023 files
+2024-09-28 15:02:05,711 - INFO - Loaded existing files tracker from S3.
+2024-09-28 15:02:05,864 - INFO - Year 2023 processed: 0 new files uploaded to S3 bucket sipsa-bucket.
+2024-09-28 15:02:06,733 - INFO - Working on 2022 files
+2024-09-28 15:02:07,525 - INFO - Loaded existing files tracker from S3.
+2024-09-28 15:02:07,596 - ERROR - Failed to download file from https://www.dane.gov.cohttps://www.dane.gov.co/files/investigaciones/agropecuario/sipsa/anex_22oct_al_28oct_2022.xlsx: HTTPSConnectionPool(host='www.dane.gov.cohttps', port=443): Max retries exceeded with url: /www.dane.gov.co/files/investigaciones/agropecuario/sipsa/anex_22oct_al_28oct_2022.xlsx (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001FDF108BE20>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+2024-09-28 15:02:07,647 - ERROR - Failed to download file from https://www.dane.gov.cohttps://www.dane.gov.co/files/investigaciones/agropecuario/sipsa/anex_15oct_al_21oct_2022.xlsx: HTTPSConnectionPool(host='www.dane.gov.cohttps', port=443): Max retries exceeded with url: /www.dane.gov.co/files/investigaciones/agropecuario/sipsa/anex_15oct_al_21oct_2022.xlsx (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001FDF108BEE0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+2024-09-28 15:02:07,910 - INFO - Year 2022 processed: 0 new files uploaded to S3 bucket sipsa-bucket.
+2024-09-28 15:02:08,738 - INFO - Working on 2021 files
+2024-09-28 15:02:09,207 - INFO - Loaded existing files tracker from S3.
+2024-09-28 15:02:09,338 - INFO - Year 2021 processed: 0 new files uploaded to S3 bucket sipsa-bucket.
+2024-09-28 15:02:10,370 - INFO - Working on 2020 files
+2024-09-28 15:02:10,907 - INFO - Loaded existing files tracker from S3.
+2024-09-28 15:02:11,042 - INFO - Year 2020 processed: 0 new files uploaded to S3 bucket sipsa-bucket.
+2024-09-28 15:02:11,847 - INFO - Working on 2019 files
+2024-09-28 15:02:12,276 - INFO - Loaded existing files tracker from S3.
+2024-09-28 15:02:12,440 - INFO - Year 2019 processed: 0 new files uploaded to S3 bucket sipsa-bucket.
+2024-09-28 15:02:13,236 - INFO - Working on 2018 files
+2024-09-28 15:02:13,495 - INFO - Loaded existing files tracker from S3.
+2024-09-28 15:02:13,656 - INFO - Year 2018 processed: 0 new files uploaded to S3 bucket sipsa-bucket.
+2024-09-28 15:02:14,477 - INFO - Working on 2017 files
+2024-09-28 15:02:14,851 - INFO - Loaded existing files tracker from S3.
+2024-09-28 15:02:15,007 - INFO - Year 2017 processed: 0 new files uploaded to S3 bucket sipsa-bucket.
+2024-09-28 15:02:15,817 - INFO - Working on 2016 files
+2024-09-28 15:02:16,018 - INFO - Loaded existing files tracker from S3.
+2024-09-28 15:02:16,151 - INFO - Year 2016 processed: 0 new files uploaded to S3 bucket sipsa-bucket.
+2024-09-28 15:02:16,954 - INFO - Working on 2015 files
+2024-09-28 15:02:17,277 - INFO - Loaded existing files tracker from S3.
+2024-09-28 15:02:17,426 - INFO - Year 2015 processed: 0 new files uploaded to S3 bucket sipsa-bucket.
+2024-09-28 15:02:18,239 - INFO - Working on 14-1 files
+2024-09-28 15:02:18,455 - INFO - Loaded existing files tracker from S3.
+2024-09-28 15:02:18,593 - INFO - Year 14-1 processed: 0 new files uploaded to S3 bucket sipsa-bucket.
+2024-09-28 15:02:19,430 - INFO - Working on 13-1 files
+2024-09-28 15:02:19,658 - INFO - Loaded existing files tracker from S3.
+2024-09-28 15:02:19,789 - INFO - Year 13-1 processed: 0 new files uploaded to S3 bucket sipsa-bucket.
+2024-09-28 15:02:20,770 - INFO - Working on 12-1 files
+2024-09-28 15:02:20,968 - INFO - Loaded existing files tracker from S3.
+2024-09-28 15:02:21,102 - INFO - Year 12-1 processed: 0 new files uploaded to S3 bucket sipsa-bucket.
+2024-09-28 15:02:21,103 - INFO - Log file logfile uploaded successfully to S3 bucket sipsa-bucket.
+2024-09-28 15:02:21,104 - INFO - Fetching first format paths from bucket: sipsa-bucket
+2024-09-28 15:02:21,709 - INFO - Found 285 files for the first format.
+2024-09-28 15:02:21,710 - INFO - Fetching second format paths from bucket: sipsa-bucket
+2024-09-28 15:02:22,278 - INFO - Found 333 files for the second format.
+2024-09-28 15:02:22,280 - INFO - Started working on first batch of files
+2024-09-28 15:02:22,478 - INFO - Started working on second batch of files

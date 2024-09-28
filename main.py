@@ -1,40 +1,42 @@
-import time
-import pandas as pd
-from pathlib import Path
-import os
-import boto3
-from utils import web_scrapper, data_cleaner, aws
+
+from src.logging_setup import setup_logger
+from src.ProcessHandler import ProcessHandler
 from dotenv import load_dotenv
+from sqlalchemy import create_engine
+import boto3
+import os
+
+# Loading credentials
+load_dotenv()
+aws_access_key_id = os.environ['aws_access_key_id']
+aws_secret_access_key = os.environ['aws_secret_access_key']
+    
+db_user = os.environ['db_user']
+db_pass = os.environ['db_pass']
+db_host = os.environ['db_host']
+db_port = os.environ['db_port']
+db_name = os.environ['db_name']
+
+table_name = os.environ['table_name']
+bucket_name = os.environ['bucket_name']
 
 
+# Creating connection to database
+engine = create_engine(f'postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}')
 
-if __name__ == '__main__': 
-    # Loading credentials
-    load_dotenv()
-    aws_access_key_id = os.environ['aws_access_key_id']
-    aws_secret_access_key = os.environ['aws_secret_access_key']
-    
-    # Creating boto3 session (access the S3 bucket)
-    s3 = boto3.resource('s3',
-						aws_access_key_id = aws_access_key_id, 
-						aws_secret_access_key = aws_secret_access_key)
-    
-    # Starting time counter
-    start_time = time.perf_counter()
+# Creating boto3 session (access the S3 bucket)
+s3 = boto3.resource('s3',
+                    aws_access_key_id = aws_access_key_id, 
+                    aws_secret_access_key = aws_secret_access_key)
 
-    ######## Extracting data ########
-    web_scrapper.DataCollector(s3 = s3).get_files(bucket_name = 'sipsatracker')
-    
-    ######### Transforming data ########
-    dataframe = data_cleaner.DataWrangler(s3 = s3).building_final_file(bucket_name = 'sipsatracker')
+# Initialize logger
+logger = setup_logger()
 
-    ######### Loading data ########
-    aws.update_sipsa_file(s3 = s3, 
-							dataframe = dataframe)
-    
-    # Ending time counter
-    end_time = time.perf_counter()
-    
-    # Computing total processing time 
-    total_time = end_time - start_time
-    print(f'[Info] Total execution time {total_time:.2f}')
+
+sipsa_process = ProcessHandler(s3 = s3, 
+                               engine = engine, 
+                               bucket_name = bucket_name, 
+                               table_name = table_name, 
+                               logger = logger)
+
+sipsa_process.executing_process()
