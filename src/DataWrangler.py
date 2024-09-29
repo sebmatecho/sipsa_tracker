@@ -9,10 +9,48 @@ from pathlib import Path
 
 
 class DataWrangler(FileNameBuilder):
+    """
+    A class to handle data extraction and transformation from Excel files stored in an S3 bucket.
+
+    This class extends the FileNameBuilder class to include data wrangling functionalities such as 
+    extracting and transforming data from different formats of Excel files, constructing complete reports,
+    and categorizing data based on predefined schemas.
+
+    Attributes:
+        bucket_name (str): The name of the S3 bucket to interact with.
+        s3 (boto3.resource): An S3 resource object to interact with AWS S3.
+        logger (logging.Logger): Logger instance for logging messages.
+        categories_dict (dict): A dictionary mapping category indices to category names.
+        city_to_region (dict): A dictionary mapping city names to their respective regions.
+
+    Methods:
+        __init__(bucket_name: str, s3: boto3.resource, logger: logging.Logger):
+            Initializes the DataWrangler class with S3 resource, bucket name, and logger.
+
+        first_format_data_extraction(file_path: str) -> pd.DataFrame:
+            Extracts and processes data from an Excel file stored in an S3 bucket using the first format.
+
+        first_format_data_transformation(dataframe: pd.DataFrame, file_path: str) -> pd.DataFrame:
+            Transforms the raw data extracted from a file into a structured format with relevant categories and products.
+
+        second_format_data_extraction(file_path: str) -> pd.DataFrame:
+            Extracts and processes data from an Excel file stored in an S3 bucket using multiple sheets for the second format.
+
+        building_complete_report() -> pd.DataFrame:
+            Constructs a complete report by extracting and transforming data from two different file formats stored in an S3 bucket.
+    """
     def __init__(self, 
                  bucket_name: str, 
                  s3: boto3.resource, 
                  logger:logging.Logger):
+        """
+        Initializes the DataWrangler class with S3 resource, bucket name, and logger.
+
+        Args:
+            bucket_name (str): The name of the S3 bucket to interact with.
+            s3 (boto3.resource): An S3 resource object to interact with AWS S3.
+            logger (logging.Logger): Logger instance for logging messages.
+        """
         FileNameBuilder.__init__(self, s3, logger)
         self.bucket_name = bucket_name
         self.s3 = s3
@@ -22,7 +60,16 @@ class DataWrangler(FileNameBuilder):
         
     def first_format_data_extraction(self, file_path: str) -> pd.DataFrame:
         """
-        Extracts and processes data from an Excel file stored in an S3 bucket, handling multiple file formats.
+        Extracts and processes data from an Excel file stored in an S3 bucket using the first format.
+
+        This method reads Excel files stored in an S3 bucket, handling different file formats and engines.
+        It returns a DataFrame with the extracted data or an empty DataFrame if extraction fails.
+
+        Args:
+            file_path (str): The path of the file in the S3 bucket.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing the extracted data, or an empty DataFrame if extraction fails.
         """
         bucket = self.s3.Bucket(self.bucket_name)
         obj = bucket.Object(file_path)
@@ -52,6 +99,16 @@ class DataWrangler(FileNameBuilder):
     def first_format_data_transformation(self, dataframe: pd.DataFrame, file_path: str) -> pd.DataFrame:
         """
         Transforms the raw data extracted from a file into a structured format with relevant categories and products.
+
+        This method processes the extracted data by renaming columns, identifying product categories, and cleaning city names.
+        It returns a structured DataFrame containing the transformed data.
+
+        Args:
+            dataframe (pd.DataFrame): The raw extracted data as a DataFrame.
+            file_path (str): The path of the file in the S3 bucket.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing the transformed data, or an empty DataFrame if transformation fails.
         """
         # Keep only the first five columns and rename them
         dataframe = dataframe.iloc[:, 0:5]
@@ -149,6 +206,15 @@ class DataWrangler(FileNameBuilder):
     def second_format_data_extraction(self, file_path: str) -> pd.DataFrame:
         """
         Extracts and processes data from an Excel file stored in an S3 bucket using multiple sheets for the second format.
+
+        This method reads Excel files stored in an S3 bucket, handling different file formats and sheets. 
+        It returns a structured DataFrame containing the extracted data.
+
+        Args:
+            file_path (str): The path of the file in the S3 bucket.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing the extracted data, or an empty DataFrame if extraction fails.
         """
         bucket = self.s3.Bucket(self.bucket_name)
         obj = bucket.Object(file_path)
@@ -231,6 +297,12 @@ class DataWrangler(FileNameBuilder):
     def building_complete_report(self) -> pd.DataFrame:
         """
         Constructs a complete report by extracting and transforming data from two different file formats stored in an S3 bucket.
+
+        This method consolidates data from the two different file formats (first and second format) stored in an S3 bucket.
+        It combines and transforms the data into a structured report for analysis or further processing.
+
+        Returns:
+            pd.DataFrame: A complete report DataFrame containing data from both file formats.
         """
         first_format_paths_aws = self.first_format_paths(bucket_name=self.bucket_name)
         second_format_paths_aws = self.second_format_paths(bucket_name=self.bucket_name)

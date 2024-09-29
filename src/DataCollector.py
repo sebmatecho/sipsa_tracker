@@ -12,11 +12,64 @@ from pathlib import Path
 from tqdm import tqdm
 import logging
 
-class DataCollector:
+class DataCollector:    
+    """
+    A class used to collect, manage, and store data files from the DANE website into an S3 bucket.
+
+    This class interacts with the DANE website to fetch and download data files. It checks the existence
+    of files in an S3 bucket and updates a file tracker to ensure no duplicate downloads occur. It also provides
+    methods to upload or update files in the S3 bucket, as well as methods to display the tracking information.
+    
+
+    Attributes:
+        s3 (boto3.resource): An S3 resource object to interact with AWS S3.
+        url_base (str): The base URL of the DANE website.
+        url (str): The URL of the DANE webpage for the data.
+        headers (dict): HTTP headers used for web requests.
+        files_tracker_name (str): The name of the file tracker CSV in S3.
+        logfile_name (str): The name of the log file.
+        logger (logging.Logger): Logger instance for logging messages.
+
+    Methods:
+        __init__(s3: boto3.resource, logger: logging.Logger) -> None:
+            Initializes the DataCollector with S3 resource and logger.
+
+        all_years_links() -> List[BeautifulSoup]:
+            Fetches the set of year links available on the DANE webpage.
+
+        links_per_year(link: BeautifulSoup) -> List[BeautifulSoup]:
+            Retrieves all report links for a specific year.
+
+        check_file_exists_in_s3(bucket_name: str, file_name: str) -> bool:
+            Checks if a specific file already exists in the S3 bucket.
+
+        load_files_tracker(bucket_name: str) -> pd.DataFrame:
+            Loads the files_tracker.csv from S3 or creates a new DataFrame if it does not exist.
+
+        update_files_tracker(df: pd.DataFrame, bucket_name: str):
+            Updates the files_tracker.csv in S3.
+
+        upload_or_update_dataframe_to_s3(df: pd.DataFrame, bucket_name: str, file_name: str):
+            Uploads or updates a DataFrame as a CSV file to an S3 bucket.
+
+        download_files_per_year(link: BeautifulSoup, bucket_name: str = None):
+            Downloads all files for a specific year and optionally uploads them to an S3 bucket.
+
+        get_files(bucket_name: str = None):
+            Downloads all files from all years and optionally uploads them to an S3 bucket.
+
+        display_files_tracker(bucket_name: str) -> pd.DataFrame:
+            Displays the DataFrame contained in the files_tracker.csv file from the S3 bucket.
+            """
+    
     def __init__(self, s3: boto3.resource, logger: logging.Logger) -> None:
         """
-        Initialize the DataCollector with S3 resource and configuration parameters.
-        """
+        Initializes the DataCollector class with the provided S3 resource and logger.
+
+        Args:
+            s3 (boto3.resource): An S3 resource object to interact with AWS S3.
+            logger (logging.Logger): Logger instance for logging messages.
+            """
         self.url_base = 'https://www.dane.gov.co'
         self.url = 'https://www.dane.gov.co/index.php/estadisticas-por-tema/agropecuario/sistema-de-informacion-de-precios-sipsa/mayoristas-boletin-semanal-1'
         self.headers = {
@@ -29,7 +82,10 @@ class DataCollector:
 
     def all_years_links(self) -> List[BeautifulSoup]:
         """
-        Get the set of year links available on the DANE webpage.
+        Retrieves the set of year links available on the DANE webpage.
+
+        Returns:
+            List[BeautifulSoup]: A list of BeautifulSoup objects representing the links for each year.
         """
         try:
             response = requests.get(self.url, headers=self.headers)
@@ -44,7 +100,13 @@ class DataCollector:
 
     def links_per_year(self, link: BeautifulSoup) -> List[BeautifulSoup]:
         """
-        Get all report links for a specific year.
+        Retrieves all report links for a specific year.
+
+        Args:
+            link (BeautifulSoup): The BeautifulSoup object containing the link to the year page.
+
+        Returns:
+            List[BeautifulSoup]: A list of BeautifulSoup objects representing the report links for the specified year.
         """
         try:
             r = requests.get(self.url_base + link['href'], headers=self.headers)
@@ -60,7 +122,14 @@ class DataCollector:
 
     def check_file_exists_in_s3(self, bucket_name: str, file_name: str) -> bool:
         """
-        Check if a file already exists in the S3 bucket.
+        Checks if a specific file already exists in the S3 bucket.
+
+        Args:
+            bucket_name (str): The name of the S3 bucket.
+            file_name (str): The name of the file to check.
+
+        Returns:
+            bool: True if the file exists in the S3 bucket, False otherwise.
         """
         try:
             self.s3.Object(bucket_name, file_name).load()
@@ -74,7 +143,13 @@ class DataCollector:
 
     def load_files_tracker(self, bucket_name: str) -> pd.DataFrame:
         """
-        Load the files_tracker.csv from S3 or create a new DataFrame if it does not exist.
+        Loads the files_tracker.csv from S3 or creates a new DataFrame if it does not exist.
+
+        Args:
+            bucket_name (str): The name of the S3 bucket containing the files_tracker.csv.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing the file tracking information.
         """
         try:
             obj = self.s3.Object(bucket_name, self.files_tracker_name)
@@ -96,7 +171,11 @@ class DataCollector:
 
     def update_files_tracker(self, df: pd.DataFrame, bucket_name: str):
         """
-        Update the files_tracker.csv in S3.
+        Updates the files_tracker.csv in S3 with new file information.
+
+        Args:
+            df (pd.DataFrame): The DataFrame containing file tracking information to update.
+            bucket_name (str): The name of the S3 bucket where the files_tracker.csv is stored.
         """
         buffer = BytesIO()
         df.to_csv(buffer, index=False)
@@ -110,7 +189,12 @@ class DataCollector:
 
     def upload_or_update_dataframe_to_s3(self, df: pd.DataFrame, bucket_name: str, file_name: str):
         """
-        Upload or update a DataFrame as a CSV file to an S3 bucket.
+        Uploads or updates a DataFrame as a CSV file to an S3 bucket.
+
+        Args:
+            df (pd.DataFrame): The DataFrame to be uploaded.
+            bucket_name (str): The name of the S3 bucket to upload to.
+            file_name (str): The name of the file to be uploaded.
         """
         buffer = BytesIO()
         df.to_csv(buffer, index=False)
@@ -124,7 +208,11 @@ class DataCollector:
 
     def download_files_per_year(self, link: BeautifulSoup, bucket_name: str = None):
         """
-        Download all files for a specific year and optionally upload them directly to an S3 bucket.
+        Downloads all files for a specific year and optionally uploads them to an S3 bucket.
+
+        Args:
+            link (BeautifulSoup): The BeautifulSoup object representing the year link.
+            bucket_name (str, optional): The name of the S3 bucket to upload the files to. Defaults to None.
         """
         links_per_year = self.links_per_year(link)
         n = len(links_per_year)

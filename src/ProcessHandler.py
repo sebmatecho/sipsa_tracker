@@ -10,7 +10,52 @@ from tqdm import tqdm
 from pathlib import Path
 
 class ProcessHandler(DataWrangler, DataIngestor, DataCollector, DataValidator, FileNameBuilder):
+    """
+    The ProcessHandler class orchestrates the entire process of collecting, transforming, validating, 
+    and ingesting data from S3 into a PostgreSQL database. It combines functionalities from multiple classes 
+    to handle different stages of data processing, ensuring efficient and robust data management.
+
+    Inheritance:
+        DataWrangler: For data extraction and transformation.
+        DataIngestor: For data insertion into PostgreSQL.
+        DataCollector: For collecting and tracking files from S3.
+        DataValidator: For validating data against predefined criteria.
+        FileNameBuilder: For constructing paths for files in the S3 bucket.
+
+    Attributes:
+        s3 (boto3.resource): The S3 resource for interacting with AWS S3.
+        engine (sqlalchemy.engine.base.Engine): The SQLAlchemy engine for the PostgreSQL database connection.
+        bucket_name (str): The name of the S3 bucket to interact with.
+        table_name (str): The name of the PostgreSQL table to which data will be ingested.
+        logger (logging.Logger): Logger instance for logging process information.
+        files_tracker_df (pd.DataFrame): DataFrame tracking processed files and their status.
+
+    Methods:
+        __init__(self, s3, engine, bucket_name, table_name, logger):
+            Initializes the ProcessHandler with necessary attributes and loads the file tracker.
+
+        executing_process(self, output_dataframe: bool = False) -> pd.DataFrame:
+            Executes the data processing workflow, including data extraction, transformation, validation, and ingestion.
+
+        update_files_tracker_with_rds_load(self, file_name: str):
+            Updates the file tracker in S3 with the status of files loaded into the RDS.
+
+        querying_db(self, query: str) -> pd.DataFrame:
+            Executes a query on the PostgreSQL database and returns the result as a DataFrame.
+    """
     def __init__(self, s3, engine, bucket_name, table_name, logger):
+        """
+        Initializes the ProcessHandler with necessary resources and configurations.
+
+        Args:
+            s3 (boto3.resource): The S3 resource to interact with AWS S3.
+            engine (sqlalchemy.engine.base.Engine): The SQLAlchemy engine for the PostgreSQL database connection.
+            bucket_name (str): The name of the S3 bucket.
+            table_name (str): The name of the table in the PostgreSQL database.
+            logger (logging.Logger): Logger instance for logging information.
+
+        Initializes the base classes and sets up the files tracker.
+        """
         # Initialize DataCollector and other base classes
         
         DataCollector.__init__(self, s3, logger)
@@ -36,8 +81,15 @@ class ProcessHandler(DataWrangler, DataIngestor, DataCollector, DataValidator, F
 
     def executing_process(self, output_dataframe: bool = False) -> pd.DataFrame:
         """
-        Constructs a complete report by extracting and transforming data from two different file formats stored in an S3 bucket.
-        Only processes files not marked as 'rds_load' in the files tracker.
+        Executes the complete data processing workflow, including data extraction, transformation, validation, 
+        and ingestion into the PostgreSQL database. Only processes files not marked as 'rds_load' in the files tracker.
+
+        Args:
+            output_dataframe (bool): If True, returns the final concatenated DataFrame from all processed files.
+
+        Returns:
+            pd.DataFrame: The concatenated DataFrame of all processed files if output_dataframe is True. 
+                          Otherwise, returns None.
         """
         # Fetch all files from the source
         self.get_files(self.bucket_name)
@@ -97,7 +149,13 @@ class ProcessHandler(DataWrangler, DataIngestor, DataCollector, DataValidator, F
 
     def update_files_tracker_with_rds_load(self, file_name: str):
         """
-        Update the 'rds_load' status in the files tracker after successful insertion into RDS.
+        Updates the 'rds_load' status in the files tracker to 'yes' after successful insertion into the RDS.
+
+        Args:
+            file_name (str): The name of the file to update in the files tracker.
+
+        Returns:
+            None
         """
         # Check if the file is already present in the tracker and update it
         if file_name in self.files_tracker_df['file'].values:
@@ -112,13 +170,17 @@ class ProcessHandler(DataWrangler, DataIngestor, DataCollector, DataValidator, F
 
     def querying_db(self, query: str) -> pd.DataFrame:
         """
-        Downloads dataframe based on query pulling data from AWS RDS instance.
+        Executes a SQL query on the PostgreSQL database and returns the result as a DataFrame.
 
         Args:
-            query (str): SQL query to retrieve data.
+            query (str): The SQL query to execute.
 
         Returns:
-            pd.DataFrame with the output of query.
+            pd.DataFrame: The result of the query as a Pandas DataFrame.
+
+        Example:
+            query = "SELECT * FROM product_prices WHERE ciudad = 'bogota'"
+            result_df = self.querying_db(query=query)
         """
         # Running query and importing it 
         with self.engine.begin() as conn:

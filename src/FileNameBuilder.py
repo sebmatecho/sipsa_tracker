@@ -5,18 +5,55 @@ import logging
 from pathlib import Path
 
 class FileNameBuilder:
+    """
+    A class used to build file paths for data files stored in an S3 bucket based on specific format criteria.
+
+    This class interacts with an S3 bucket to identify and categorize files according to predefined format
+    specifications. It uses criteria such as year and file type to segregate files into 'first format' and 
+    'second format' categories. This comes from DANE changing format of the report throughout the years. 
+    
+    DANE first format refers to a single tab file with information displayed with several titles through it
+    DANE second format refers to a file containing several tabs (per food class)
+
+    Attributes:
+        s3 (boto3.resource): An S3 resource object to interact with AWS S3.
+        logger (logging.Logger): Logger instance for logging messages.
+
+    Methods:
+        __init__(s3: boto3.resource, logger: logging.Logger):
+            Initializes the FileNameBuilder class with the provided S3 resource and logger.
+
+        first_format_paths(bucket_name: str) -> List[str]:
+            Retrieves file paths from the S3 bucket that match the first format criteria.
+
+        second_format_paths(bucket_name: str) -> List[str]:
+            Retrieves file paths from the S3 bucket that match the second format criteria.
+    """
     def __init__(self, 
                  s3: boto3.resource, 
                  logger:logging.Logger):
         """
-        Initialize FileNameBuilder with S3 resource.
+        Initializes the FileNameBuilder class with the provided S3 resource and logger.
+
+        Args:
+            s3 (boto3.resource): An S3 resource object to interact with AWS S3.
+            logger (logging.Logger): Logger instance for logging messages.
         """
         self.s3 = s3
         self.logger = logger
 
     def first_format_paths(self, bucket_name: str) -> List[str]:
         """
-        Get the paths of files in the S3 bucket that match the first format criteria.
+        Retrieves file paths from the S3 bucket that match the first format criteria.
+
+        The first format includes files from the years 2012 to 2017, and files from the year 2018 up to 
+        and including week 19. It filters files based on their extensions (.xls, .xlsx).
+
+        Args:
+            bucket_name (str): The name of the S3 bucket containing the files.
+
+        Returns:
+            List[str]: A list of file paths matching the first format criteria.
         """
         self.logger.info(f"Fetching first format paths from bucket: {bucket_name}")
         bucket = self.s3.Bucket(bucket_name)
@@ -49,7 +86,16 @@ class FileNameBuilder:
 
     def second_format_paths(self, bucket_name: str) -> List[str]:
         """
-        Get the paths of files in the S3 bucket that match the second format criteria.
+        Retrieves file paths from the S3 bucket that match the second format criteria.
+
+        The second format includes files from the years 2018 (after week 19) to 2024. It filters files based 
+        on their extensions (.xls, .xlsx).
+
+        Args:
+            bucket_name (str): The name of the S3 bucket containing the files.
+
+        Returns:
+            List[str]: A list of file paths matching the second format criteria.
         """
         self.logger.info(f"Fetching second format paths from bucket: {bucket_name}")
         bucket = self.s3.Bucket(bucket_name)
