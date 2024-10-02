@@ -8,6 +8,9 @@ from src.DataIngestor import DataIngestor
 import pandas as pd
 from tqdm import tqdm
 from pathlib import Path
+import boto3
+import logging
+import sqlalchemy
 
 class ProcessHandler(DataWrangler, DataIngestor, DataCollector, DataValidator, FileNameBuilder):
     """
@@ -43,7 +46,12 @@ class ProcessHandler(DataWrangler, DataIngestor, DataCollector, DataValidator, F
         querying_db(self, query: str) -> pd.DataFrame:
             Executes a query on the PostgreSQL database and returns the result as a DataFrame.
     """
-    def __init__(self, s3, engine, bucket_name, table_name, logger):
+    def __init__(self, 
+                 s3:boto3.resource, 
+                 engine:sqlalchemy.engine.base.Engine, 
+                 bucket_name:str, 
+                 table_name:str, 
+                 logger:logging.Logger):
         """
         Initializes the ProcessHandler with necessary resources and configurations.
 
@@ -81,17 +89,19 @@ class ProcessHandler(DataWrangler, DataIngestor, DataCollector, DataValidator, F
 
     def executing_process(self, output_dataframe: bool = False) -> pd.DataFrame:
         """
-        Executes the complete data processing workflow, including data extraction, transformation, validation, 
-        and ingestion into the PostgreSQL database. Only processes files not marked as 'rds_load' in the files tracker.
+        Executes the complete data processing workflow, including:
+        1. Checking for files in the S3 bucket.
+        2. Downloading files from SIPSA webpage if not present in S3.
+        3. Processing the files and uploading the data to the database if not already in RDS.
+        4. Updating the tracker file within S3.
 
         Args:
             output_dataframe (bool): If True, returns the final concatenated DataFrame from all processed files.
 
         Returns:
-            pd.DataFrame: The concatenated DataFrame of all processed files if output_dataframe is True. 
-                          Otherwise, returns None.
+            pd.DataFrame: The concatenated DataFrame of all processed files if output_dataframe is True. Otherwise, returns None.
         """
-        # Fetch all files from the source
+        # Fetch all files from the S3 bucket
         self.get_files(self.bucket_name)
 
         # Generate paths for the different file formats
@@ -103,13 +113,22 @@ class ProcessHandler(DataWrangler, DataIngestor, DataCollector, DataValidator, F
 
         # Process files in the first format
         for file_path in tqdm(first_format_paths_aws):
-            
             file_name = Path(file_path).name
-            # Skip files that are already loaded into RDS
-            if not self.files_tracker_df.empty and self.files_tracker_df.loc[self.files_tracker_df['file'] == file_name, 'rds_load'].values[0] == 'yes':
-#                 logger.info(f"[INFO] Skipping file {file_name} as it is already loaded into RDS.")
-                continue
 
+            # Check if the file is already in the S3 bucket, if not, download it from SIPSA
+            if file_name not in [Path(f).name for f in first_format_paths_aws]:
+                self.logger.info(f"Downloading {file_name} from SIPSA webpage as it is not present in S3.")
+                self.download_file_from_sipsa(file_name)
+
+            # Skip files already loaded into RDS
+            try:
+                if not self.files_tracker_df.empty and self.files_tracker_df.loc[self.files_tracker_df['file'] == file_name, 'rds_load'].values[0] == 'yes':
+                    self.logger.info(f"Skipping file {file_name} as it is already loaded into RDS.")
+                    continue
+            except: 
+                None
+
+            # Extract data from the first format file
             dataframe = self.first_format_data_extraction(file_path)
             if not dataframe.empty:
                 transformed_df = self.first_format_data_transformation(dataframe, file_path)
@@ -119,32 +138,47 @@ class ProcessHandler(DataWrangler, DataIngestor, DataCollector, DataValidator, F
 
                 if output_dataframe:
                     first_format_final = pd.concat([first_format_final, transformed_df], ignore_index=True)
+
+                # Insert into the database and update the tracker
                 self.insert_dataframe_to_db(dataframe=valid_df, table_name=self.table_name)
                 self.update_files_tracker_with_rds_load(file_name)  # Update tracker after successful load
+
         self.logger.info('Started working on second batch of files')
         second_format_final = pd.DataFrame()
-        
+
         # Process files in the second format
         for file_path in tqdm(second_format_paths_aws):
             file_name = Path(file_path).name
-            # Skip files that are already loaded into RDS
-            if not self.files_tracker_df.empty and self.files_tracker_df.loc[self.files_tracker_df['file'] == file_name, 'rds_load'].values[0] == 'yes':
-#                 logger.info(f"[INFO] Skipping file {file_name} as it is already loaded into RDS.")
+
+            # Check if the file is already in the S3 bucket, if not, download it from SIPSA
+            if file_name not in [Path(f).name for f in second_format_paths_aws]:
+                self.logger.info(f"Downloading {file_name} from SIPSA webpage as it is not present in S3.")
+                self.download_file_from_sipsa(file_name)
+
+            # Skip files already loaded into RDS
+            if not self.files_tracker_df.empty and \
+                    self.files_tracker_df.loc[self.files_tracker_df['file'] == file_name, 'rds_load'].values[0] == 'yes':
+                self.logger.info(f"Skipping file {file_name} as it is already loaded into RDS.")
                 continue
 
+            # Extract data from the second format file
             dataframe = self.second_format_data_extraction(file_path)
-            
+
             # Validate DataFrame before inserting into the database
             valid_df = self.validate_dataframe(dataframe)
-            
+
+            # Insert into the database and update the tracker
             self.insert_dataframe_to_db(dataframe=valid_df, table_name=self.table_name)
             self.update_files_tracker_with_rds_load(file_name)  # Update tracker after successful load
+
             if output_dataframe:
                 second_format_final = pd.concat([second_format_final, dataframe], ignore_index=True)
 
+        # Return the complete report if requested
         if output_dataframe:
             complete_report = pd.concat([first_format_final, second_format_final], ignore_index=True)
             return complete_report
+
 
 
     def update_files_tracker_with_rds_load(self, file_name: str):

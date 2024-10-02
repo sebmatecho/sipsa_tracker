@@ -30,7 +30,7 @@ s3 = boto3.resource('s3',
                     aws_secret_access_key = aws_secret_access_key)
 
 # Initialize logger
-logger = setup_logger()
+logger, upload_log_to_s3 = setup_logger(s3 = s3)
 
 
 sipsa_process = ProcessHandler(s3 = s3, 
@@ -40,3 +40,6 @@ sipsa_process = ProcessHandler(s3 = s3,
                                logger = logger)
 
 sipsa_process.executing_process()
+upload_log_to_s3(bucket_name = bucket_name)
+
+

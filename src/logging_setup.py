@@ -2,9 +2,12 @@
 import logging
 import sys
 from pathlib import Path
+from datetime import datetime
+import boto3
 
 # Configure logging
-def setup_logger():
+def setup_logger(s3, 
+                s3_key_prefix: str = "logs/"):
     """
     Sets up and configures a logger for the application.
 
@@ -45,11 +48,13 @@ def setup_logger():
     logger.setLevel(logging.INFO)
 
     # Create handlers
+    today_date = datetime.today().strftime(format = '%m_%d_%Y')
     c_handler = logging.StreamHandler(sys.stdout)
-    f_handler = logging.FileHandler(log_path/'sipsa_process.log', mode='w')
+    file_name = f'sipsa_process_{today_date}.log'
+    f_handler = logging.FileHandler(log_path/file_name, mode='w')
 
     # Set levels
-    c_handler.setLevel(logging.INFO)
+    c_handler.setLevel(logging.ERROR)
     f_handler.setLevel(logging.INFO)
 
     # Create formatters and add them to handlers
@@ -60,5 +65,14 @@ def setup_logger():
     # Add handlers to the logger
     logger.addHandler(c_handler)
     logger.addHandler(f_handler)
-
-    return logger
+    
+    def upload_log_to_s3(bucket_name, s3 = s3, file_name = file_name):
+        logger.info(f"Uploading log file  to S3 bsucket {s3}")
+        try:
+            with open(f'logs/{file_name}', "rb") as f:
+                 s3.Bucket(bucket_name).put_object(Key=s3_key_prefix + file_name, Body=f)
+            logger.info(f"Log file uploaded to S3: s3://{s3}/{s3_key_prefix}{file_name}")
+        except Exception as e:
+            logger.error(f"Failed to upload log file to S3: {e}")
+    # Return the logger and upload function
+    return logger, upload_log_to_s3

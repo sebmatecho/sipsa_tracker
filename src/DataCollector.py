@@ -156,10 +156,6 @@ class DataCollector:
             response = obj.get()
             tracker_df = pd.read_csv(BytesIO(response['Body'].read()))
             self.logger.info("Loaded existing files tracker from S3.")
-        except self.s3.meta.client.exceptions.NoSuchKey:
-            # If files_tracker.csv does not exist, initialize an empty DataFrame
-            tracker_df = pd.DataFrame(columns=['file', 'link', 'date_added'])
-            self.logger.info("No existing files tracker found in S3. Creating a new one.")
         except ClientError as e:
             if e.response['Error']['Code'] == 'NoSuchKey':
                 tracker_df = pd.DataFrame(columns=['file', 'link', 'date_added'])

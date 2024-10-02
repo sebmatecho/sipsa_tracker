@@ -3,6 +3,7 @@ import sqlalchemy
 from sqlalchemy import create_engine
 import logging
 import pandas as pd
+from sqlalchemy.exc import SQLAlchemyError
 
 class DataIngestor:
     """
@@ -71,12 +72,11 @@ class DataIngestor:
                              chunksize=500)
 
             self.logger.info(f"Data successfully inserted into {table_name}.")
-#             print(f"Data successfully inserted into {table_name}.")
 
         except SQLAlchemyError as e:
             self.logger.error(f"Error inserting data: {e}")
-            print(f"Error inserting data:")
+            raise
 
         finally:
             # Close the connection
-            engine.dispose()
+            self.engine.dispose()
