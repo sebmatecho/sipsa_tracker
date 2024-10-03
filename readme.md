@@ -13,7 +13,7 @@ This project is a fully automated data pipeline for scraping, processing, and in
 
 ### What is SIPSA?
 
-The **[SIPSA] (https://www.dane.gov.co/index.php/estadisticas-por-tema/agropecuario/sistema-de-informacion-de-precios-sipsa)(Sistema de Información de Precios del Sector Agropecuario)**
+The **[SIPSA](https://www.dane.gov.co/index.php/estadisticas-por-tema/agropecuario/sistema-de-informacion-de-precios-sipsa) (Sistema de Información de Precios del Sector Agropecuario)**
  is one of DANE’s key projects, focused on monitoring and reporting agricultural prices across Colombia’s main markets. Each week, SIPSA publishes reports detailing the wholesale prices of various agricultural products (fruits, vegetables, grains, etc.) from major Colombian marketplaces. This data is crucial for understanding trends in food prices, supporting government policy, business decision-making, and providing insights into the agricultural economy.
 
 ### What Does This Project Do?
