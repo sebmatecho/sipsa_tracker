@@ -1,11 +1,5 @@
 # Food Prices Tracker: Colombian case
-### by [Sébastien Lozano-Forero](https://www.linkedin.com/in/sebastienlozanoforero/)
-
-This projects aims to track food prices for over ten years in Colombia. Data source is The National Division for Statistics (DANE, in spanish), which is a public agency running the  project (collecting and publishing prices every week). 
-
-Ongoing project! 
-
-# DANE SIPSA Data Pipeline
+#### by [Sébastien Lozano-Forero](https://www.linkedin.com/in/sebastienlozanoforero/)
 
 ## Overview
 
