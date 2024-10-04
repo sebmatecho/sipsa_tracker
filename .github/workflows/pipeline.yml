@@ -55,7 +55,7 @@
 #         echo "Logs uploaded"
 
 
-name: SIPSA Data Pipeline CI/CD
+name: SIPSA CI/CD
 
 # Trigger CI on push and pull requests, and CD on schedule (daily)
 on:
