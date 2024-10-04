@@ -1,15 +1,12 @@
-name: SIPSA CI/CD
+name: SIPSA Data Pipeline CI/CD
 
-# Trigger CI on push and pull requests, and CD on schedule (daily)
+# Trigger on push to any branch and also on a schedule (daily at midnight UTC)
 on:
   push:
     branches:
-      - main  # CI runs on pushes to the main branch
-  pull_request:
-    branches:
-      - main  # CI runs on pull requests to the main branch
+      - '**'  # Trigger on push to any branch
   schedule:
-    - cron: '0 0 * * *'  # CD runs daily at midnight UTC
+    - cron: '0 0 * * *'  # Also trigger daily at midnight UTC
 
 jobs:
   # Continuous Integration (CI): Test the code
@@ -40,11 +37,10 @@ jobs:
         source venv/bin/activate
         pytest tests/
 
-  # Continuous Deployment (CD): Deploy only if CI is successful
+  # Continuous Deployment (CD): Run the pipeline if CI is successful
   cd:
     needs: ci  # Ensures that the CD job runs only if the CI job is successful
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
 
     steps:
     # Step 1: Check out the repository code
