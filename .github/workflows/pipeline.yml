@@ -54,8 +54,10 @@
 #         # Upload or store logs in a location like AWS S3 (if applicable)
 #         echo "Logs uploaded"
 
+
 name: SIPSA Data Pipeline CI/CD
 
+# Trigger CI on push and pull requests, and CD on schedule (daily)
 on:
   push:
     branches:
