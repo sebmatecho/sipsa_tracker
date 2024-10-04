@@ -1,4 +1,4 @@
-name: Run SIPSA Data Pipeline
+# name: Run SIPSA Data Pipeline
 
 # on:
 #   schedule:
