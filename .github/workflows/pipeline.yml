@@ -1,12 +1,107 @@
 name: Run SIPSA Data Pipeline
 
+# on:
+#   schedule:
+#     - cron: '0 0 * * *'  # Runs daily at midnight UTC
+
+# jobs:
+#   run-pipeline:
+#     runs-on: ubuntu-latest  # Use the latest Ubuntu runner
+
+#     steps:
+#     # Step 1: Check out the repository code
+#     - name: Checkout repository
+#       uses: actions/checkout@v2
+
+#     # Step 2: Set up Python environment
+#     - name: Set up Python 3.9
+#       uses: actions/setup-python@v2
+#       with:
+#         python-version: 3.9
+
+#     # Step 3: Install dependencies from requirements.txt
+#     - name: Install dependencies
+#       run: |
+#         python -m venv venv
+#         source venv/bin/activate
+#         pip install -r requirements.txt
+    
+#      # Step 4: Run tests using pytest 
+#     - name: Run tests
+#       run: |
+#         source venv/bin/activate
+#         pytest tests/
+
+#     # Step 5: Run the Python script 
+#     - name: Run SIPSA Data Pipeline
+#       env:
+#         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#         BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+#         DB_HOST: ${{ secrets.DB_HOST }}
+#         DB_NAME: ${{ secrets.DB_NAME }}
+#         DB_PASS: ${{ secrets.DB_PASS }}
+#         DB_PORT: ${{ secrets.DB_PORT }}
+#         DB_USER: ${{ secrets.DB_USER }}
+#         TABLE_NAME: ${{ secrets.TABLE_NAME }}
+#       run: |
+#         source venv/bin/activate
+#         python main.py
+
+#     # Optional Step 6: Upload logs or send notifications (if required)
+#     - name: Upload logs
+#       run: |
+#         # Upload or store logs in a location like AWS S3 (if applicable)
+#         echo "Logs uploaded"
+
+
+name: SIPSA Data Pipeline CI/CD
+
+# Trigger CI on push and pull requests, and CD on schedule (daily)
 on:
+  push:
+    branches:
+      - main  # CI runs on pushes to the main branch
+  pull_request:
+    branches:
+      - main  # CI runs on pull requests to the main branch
   schedule:
-    - cron: '0 0 * * *'  # Runs daily at midnight UTC
+    - cron: '0 0 * * *'  # CD runs daily at midnight UTC
 
 jobs:
-  run-pipeline:
-    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
+  # Continuous Integration (CI): Test the code
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Check out the repository code
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    # Step 2: Set up Python environment
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+
+    # Step 3: Install dependencies from requirements.txt
+    - name: Install dependencies
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt
+    
+    # Step 4: Run tests using pytest (CI step)
+    - name: Run tests
+      run: |
+        source venv/bin/activate
+        pytest tests/
+
+  # Continuous Deployment (CD): Deploy only if CI is successful
+  cd:
+    needs: ci  # Ensures that the CD job runs only if the CI job is successful
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
 
     steps:
     # Step 1: Check out the repository code
@@ -26,8 +121,7 @@ jobs:
         source venv/bin/activate
         pip install -r requirements.txt
 
-    # Step 4: Run the Python script (this executes main.py)
-    # Use GitHub Secrets to pass environment variables securely
+    # Step 4: Run the Python script (deploy step)
     - name: Run SIPSA Data Pipeline
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -46,5 +140,4 @@ jobs:
     # Optional Step 5: Upload logs or send notifications (if required)
     - name: Upload logs
       run: |
-        # Upload or store logs in a location like AWS S3 (if applicable)
         echo "Logs uploaded"
