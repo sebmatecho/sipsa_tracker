@@ -155,11 +155,21 @@ class ProcessHandler(DataWrangler, DataIngestor, DataCollector, DataValidator, F
                 self.logger.info(f"Downloading {file_name} from SIPSA webpage as it is not present in S3.")
                 self.download_file_from_sipsa(file_name)
 
-            # Skip files already loaded into RDS
-            if not self.files_tracker_df.empty and \
-                    self.files_tracker_df.loc[self.files_tracker_df['file'] == file_name, 'rds_load'].values[0] == 'yes':
-                self.logger.info(f"Skipping file {file_name} as it is already loaded into RDS.")
-                continue
+            try:
+                if not self.files_tracker_df.empty and file_name in self.files_tracker_df['file'].values:
+                    if self.files_tracker_df.loc[self.files_tracker_df['file'] == file_name, 'rds_load'].values[0] == 'yes':
+                        self.logger.info(f"Skipping file {file_name} as it is already loaded into RDS.")
+                        continue
+                else:
+                    self.logger.info(f"{file_name} not found in the files tracker. Proceeding with processing.")
+            except IndexError:
+                self.logger.warning(f"IndexError encountered when checking RDS load status for {file_name}. Proceeding with processing.")
+
+            # # Skip files already loaded into RDS
+            # if not self.files_tracker_df.empty and \
+            #         self.files_tracker_df.loc[self.files_tracker_df['file'] == file_name, 'rds_load'].values[0] == 'yes':
+            #     self.logger.info(f"Skipping file {file_name} as it is already loaded into RDS.")
+            #     continue
 
             # Extract data from the second format file
             dataframe = self.second_format_data_extraction(file_path)
