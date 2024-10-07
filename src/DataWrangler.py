@@ -1,8 +1,8 @@
 
 
 import pandas as pd
-from FileNameBuilder import FileNameBuilder
-# from src.FileNameBuilder import FileNameBuilder
+# from FileNameBuilder import FileNameBuilder
+from src.FileNameBuilder import FileNameBuilder
 from config import CATEGORIES_DICT, CITY_TO_REGION
 import boto3
 import logging

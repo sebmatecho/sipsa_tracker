@@ -1,15 +1,15 @@
 
-# from src.DataCollector import DataCollector
-# from src.DataWrangler import DataWrangler
-# from src.FileNameBuilder import FileNameBuilder
-# from src.DataValidator import DataValidator
-# from src.DataIngestor import DataIngestor
+from src.DataCollector import DataCollector
+from src.DataWrangler import DataWrangler
+from src.FileNameBuilder import FileNameBuilder
+from src.DataValidator import DataValidator
+from src.DataIngestor import DataIngestor
 
-from DataCollector import DataCollector
-from DataWrangler import DataWrangler
-from FileNameBuilder import FileNameBuilder
-from DataValidator import DataValidator
-from DataIngestor import DataIngestor
+# from DataCollector import DataCollector
+# from DataWrangler import DataWrangler
+# from FileNameBuilder import FileNameBuilder
+# from DataValidator import DataValidator
+# from DataIngestor import DataIngestor
 
 import pandas as pd
 from tqdm import tqdm
