@@ -93,8 +93,7 @@ if visualization_type == 'Price Trends Across Time':
       cities = run.queries_on_rds(city_query)
       cities_list = [city.title().replace('_',' ') for city in cities['ciudad'].to_list()]
       city = st.selectbox("City of interest", 
-                          cities_list
-                                      )
+                          cities_list)
       city = city.lower().replace(' ','_')
       query = queries.test_query(city = city)
       dataframe = run.queries_on_rds(query = query )
