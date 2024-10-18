@@ -98,8 +98,7 @@ if visualization_type == 'Price Trends Across Time':
       city = city.lower().replace(' ','_')
       query = queries.test_query(city = city)
       dataframe = run.queries_on_rds(query = query )
-	# st.dataframe(dataframe)
-visuals.lineplot_per_category(dataframe = dataframe, 
+      visuals.lineplot_per_category(dataframe = dataframe, 
 									numerical_value = 'mean_price' ,
 									categorical_value = 'category',
                                     city = city, 
