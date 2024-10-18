@@ -98,3 +98,34 @@ class DataPipelineManager:
 
 
 
+class AppDataManager:
+    def __init__(self):
+        """
+        Initializes the AppDataManager class, loading environment variables and setting up S3 and RDS connections.
+        """
+        load_dotenv()
+
+
+        # Initialize RDS database credentials
+        self.db_user = os.environ['db_user']
+        self.db_pass = os.environ['db_pass']
+        self.db_host = os.environ['db_host']
+        self.db_port = os.environ['db_port']
+        self.db_name = os.environ['db_name']
+        self.engine = create_engine(f'postgresql://{self.db_user}:{self.db_pass}@{self.db_host}:{self.db_port}/{self.db_name}')
+    
+    def queries_on_rds(self, query: str) -> pd.DataFrame:
+        """
+        Executes a SQL query on the RDS PostgreSQL database and returns the result as a pandas DataFrame.
+
+        Args:
+            query (str): The SQL query to execute.
+
+        Returns:
+            pd.DataFrame: The result of the SQL query.
+        """
+        with self.engine.begin() as conn:
+            dataframe = pd.read_sql(sql=query, con=conn)
+        return dataframe
+
+    

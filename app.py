@@ -85,7 +85,7 @@ if visualization_type == "Introduction to SIPSA Project":
     
 
 if visualization_type == 'Price Trends Across Time':
-      run = aws.DataPipelineManager()
+      run = aws.AppDataManager()
       city_query = """
 		SELECT DISTINCT ciudad
 		FROM product_prices;
