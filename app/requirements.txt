@@ -4,3 +4,4 @@ matplotlib
 seaborn
 SQLAlchemy==2.0.35
 psycopg2-binary
+statsmodels==0.14.4
