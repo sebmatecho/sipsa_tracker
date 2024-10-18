@@ -5,3 +5,4 @@ seaborn
 SQLAlchemy==2.0.35
 psycopg2-binary
 statsmodels==0.14.4
+boto3==1.35.29
