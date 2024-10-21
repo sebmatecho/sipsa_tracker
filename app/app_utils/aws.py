@@ -39,7 +39,7 @@ class DataPipelineManager:
             max_overflow=20,  # Maximum number of overflow connections beyond pool_size
             pool_timeout=30  # Maximum seconds to wait before giving up on a connection
             )
-    @st.cache_data(show_spinner=False)
+    # @st.cache_data(show_spinner=False)
     def queries_on_rds(self, query: str) -> pd.DataFrame:
         """
         Executes a SQL query on the RDS PostgreSQL database and returns the result as a pandas DataFrame.
