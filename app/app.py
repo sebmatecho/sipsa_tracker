@@ -100,6 +100,17 @@ if visualization_type == "Introduction to SIPSA Project":
 
 if visualization_type == 'Price Trends Across Time':
       
+      dataframe = queries.nation_wide_trend()
+      
+      visuals.lineplot_per_category_nationwide(dataframe=dataframe, 
+                      numerical_value='mean_price',
+                      categorical_value='category',
+                      title='Price Evolution by Category (Nationwide)',
+                      xlabel='',
+                      ylabel='Average Price')
+
+
+
       cities = queries.city_query()
       cities_list = [city.title().replace('_',' ') for city in cities['ciudad'].to_list()]
       city = st.selectbox("City of interest", 
