@@ -4,13 +4,14 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from app_utils import visualizations as visuals
 from app_utils import queries 
-from app_utils import aws
+
 # Set up Streamlit page configuration
 st.set_page_config(
     page_title="SIPSA explorer",
     page_icon="📊",
     layout="wide",
 )
+
 
 # Main app content
 st.title("Exploring Colombian Food Price Dynamics - SIPSA Project")
@@ -31,12 +32,12 @@ visualization_type = st.sidebar.radio(
     "Analysis area",
     ("Introduction to SIPSA Project", 
      "Price Trends Across Time", 
-     "City and Regional Comparisons", 
-     "Category-Specific Trends",
-     "Product Popularity and Trends",
-     "Price Extremes and Anomalies",
-     "Market-Specific Insights", 
-     "Relationship Between Prices and Trends" 
+    #  "City and Regional Comparisons", 
+    #  "Category-Specific Trends",
+    #  "Product Popularity and Trends",
+    #  "Price Extremes and Anomalies",
+    #  "Market-Specific Insights", 
+    #  "Relationship Between Prices and Trends" 
 	)
 )
 
@@ -77,26 +78,37 @@ if visualization_type == "Introduction to SIPSA Project":
     - Navigate to different sections to dive deeper into specific topics of interest.
     
     We encourage you to explore the sections to gain insights into **Colombian food price dynamics**, trends over the years, and unique pricing behaviors. Whether you are interested in **food security**, **market trends**, or specific product fluctuations, this tool can serve as an important resource.
+    """)
+    
+    st.title("Composition of the SIPSA Database")
+    dataframe = queries.city_composition_query()
+    visuals.city_composition_visualization(dataframe = dataframe)
 
+    dataframe = queries.category_composition_query()
+    visuals.category_composition_visualization(dataframe = dataframe)
+
+    
+
+    st.markdown("""
     ---
     
     *SIPSA Project - An interactive exploration of Colombia's agricultural markets.*
     """)
+
+
     
 
 if visualization_type == 'Price Trends Across Time':
-      run = aws.AppDataManager()
-      city_query = """
-		SELECT DISTINCT ciudad
-		FROM product_prices;
-		"""
-      cities = run.queries_on_rds(city_query)
+      
+      cities = queries.city_query()
       cities_list = [city.title().replace('_',' ') for city in cities['ciudad'].to_list()]
       city = st.selectbox("City of interest", 
                           cities_list)
+      
+      
       city = city.lower().replace(' ','_')
-      query = queries.test_query(city = city)
-      dataframe = run.queries_on_rds(query = query )
+      dataframe = queries.price_category_query(city = city)
+      
       visuals.lineplot_per_category(dataframe = dataframe, 
 									numerical_value = 'mean_price' ,
 									categorical_value = 'category',

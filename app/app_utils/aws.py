@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from io import BytesIO
 from sqlalchemy import create_engine
 from botocore.exceptions import ClientError
+import streamlit as st
 
 class DataPipelineManager:
     def __init__(self):
@@ -29,8 +30,16 @@ class DataPipelineManager:
         self.db_host = os.environ['db_host']
         self.db_port = os.environ['db_port']
         self.db_name = os.environ['db_name']
-        self.engine = create_engine(f'postgresql://{self.db_user}:{self.db_pass}@{self.db_host}:{self.db_port}/{self.db_name}')
+        # self.engine = create_engine(f'postgresql://{self.db_user}:{self.db_pass}@{self.db_host}:{self.db_port}/{self.db_name}')
     
+
+        self.engine = create_engine(
+            f'postgresql://{self.db_user}:{self.db_pass}@{self.db_host}:{self.db_port}/{self.db_name}',
+            pool_size=10,  # Number of connections in the pool
+            max_overflow=20,  # Maximum number of overflow connections beyond pool_size
+            pool_timeout=30  # Maximum seconds to wait before giving up on a connection
+            )
+    @st.cache_data(show_spinner=False)
     def queries_on_rds(self, query: str) -> pd.DataFrame:
         """
         Executes a SQL query on the RDS PostgreSQL database and returns the result as a pandas DataFrame.

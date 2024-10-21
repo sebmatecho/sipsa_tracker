@@ -119,3 +119,129 @@ def lineplot_per_category(dataframe: pd.DataFrame,
         file_name=f"lineplot_per_category_{city}.png",
         mime="image/png"
     )
+
+def city_composition_visualization(dataframe: pd.DataFrame):
+    """
+    Visualizes the number of records per year for each city using a stacked bar chart. The function sorts cities by the total count of records, 
+    replaces city names to Title case for better readability, and allows the user to download the resulting plot.
+    
+    Args:
+        dataframe (pd.DataFrame): A DataFrame with the following columns:
+            - 'city': City name in snake_case format.
+            - 'year': Year of the records.
+            - 'num_records': Number of records for each city per year.
+    
+    The function sorts cities by the total count of records in descending order, converts city names from snake_case to Title case, 
+    creates a stacked bar chart to represent the number of records per year for each city, and displays the plot in Streamlit. 
+    The user can also download the plot as a PNG image.
+    """
+    # Calculate total records per city for sorting purposes
+    city_totals = dataframe.groupby('city')['num_records'].sum().sort_values(ascending=False)
+
+    # Convert city names to Title case for better readability
+    dataframe['city'] = dataframe['city'].str.replace('_', ' ').str.title()
+
+    # Re-order the cities in the dataframe according to total record counts in descending order
+    sorted_cities = city_totals.index.str.replace('_', ' ').str.title()
+    dataframe['city'] = pd.Categorical(dataframe['city'], categories=sorted_cities, ordered=True)
+    df_sorted = dataframe.sort_values('city')
+
+    # Pivot the DataFrame for better visualization - Grouped by city and years as values
+    df_pivot = df_sorted.pivot(index='city', columns='year', values='num_records').fillna(0)
+
+    # Set up the figure size and style
+    plt.figure(figsize=(16, 10))
+    sns.set(style="whitegrid")
+
+    # Plot the data
+    ax = df_pivot.plot(kind='bar', stacked=True, figsize=(16, 10), colormap="tab20")
+
+    # Add titles and labels
+    plt.title('Number of Records per Year and per City (Sorted by Total Count)', fontsize=20)
+    plt.xlabel('City', fontsize=16)
+    plt.ylabel('Number of Records', fontsize=16)
+    plt.xticks(rotation=90, ha='right', fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.legend(title="Year", bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=10)
+
+    # Adjust layout for readability
+    plt.tight_layout()
+
+    # Display the plot using Streamlit
+    st.pyplot(plt)
+
+    # Save the plot to a BytesIO buffer for download
+    buf = BytesIO()
+    plt.savefig(buf, format="png")
+    buf.seek(0)
+
+    # Provide a download button for the plot
+    st.download_button(
+        label="Download Plot as PNG",
+        data=buf,
+        file_name="number_of_records_per_year_and_city.png",
+        mime="image/png"
+    )
+
+def category_composition_visualization(dataframe: pd.DataFrame):
+    """
+    Visualizes the number of records per year for each category using a stacked bar chart. The function sorts cities by the total count of records, 
+    replaces category names to Title case for better readability, and allows the user to download the resulting plot.
+    
+    Args:
+        dataframe (pd.DataFrame): A DataFrame with the following columns:
+            - 'category': category.
+            - 'year': Year of the records.
+            - 'num_records': Number of records for each category per year.
+    
+    The function sorts cities by the total count of records in descending order, converts category names from snake_case to Title case, 
+    creates a stacked bar chart to represent the number of records per year for each category, and displays the plot in Streamlit. 
+    The user can also download the plot as a PNG image.
+    """
+    # Calculate total records per category for sorting purposes
+    category_totals = dataframe.groupby('category')['num_records'].sum().sort_values(ascending=False)
+
+    # Convert category names to Title case for better readability
+    dataframe['category'] = dataframe['category'].str.replace('_', ' ').str.title()
+
+    # Re-order the cities in the dataframe according to total record counts in descending order
+    sorted_cities = category_totals.index.str.replace('_', ' ').str.title()
+    dataframe['category'] = pd.Categorical(dataframe['category'], categories=sorted_cities, ordered=True)
+    df_sorted = dataframe.sort_values('category')
+
+    # Pivot the DataFrame for better visualization - Grouped by category and years as values
+    df_pivot = df_sorted.pivot(index='category', columns='year', values='num_records').fillna(0)
+
+    # Set up the figure size and style
+    plt.figure(figsize=(16, 10))
+    sns.set(style="whitegrid")
+
+    # Plot the data
+    ax = df_pivot.plot(kind='bar', stacked=True, figsize=(16, 10), colormap="tab20")
+
+    # Add titles and labels
+    plt.title('Number of Records per Year and per category (Sorted by Total Count)', fontsize=20)
+    plt.xlabel('category', fontsize=16)
+    plt.ylabel('Number of Records', fontsize=16)
+    plt.xticks(rotation=90, ha='right', fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.legend(title="Year", bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=10)
+
+    # Adjust layout for readability
+    plt.tight_layout()
+
+    # Display the plot using Streamlit
+    st.pyplot(plt)
+
+    # Save the plot to a BytesIO buffer for download
+    buf = BytesIO()
+    plt.savefig(buf, format="png")
+    buf.seek(0)
+
+    # Provide a download button for the plot
+    st.download_button(
+        label="Download Plot as PNG",
+        data=buf,
+        file_name="number_of_records_per_year_and_category.png",
+        mime="image/png"
+    )
