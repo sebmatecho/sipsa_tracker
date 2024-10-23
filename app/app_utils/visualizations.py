@@ -132,11 +132,11 @@ def city_composition_visualization(dataframe: pd.DataFrame):
             - 'num_records': Number of records for each city per year.
     
     The function sorts cities by the total count of records in descending order, converts city names from snake_case to Title case, 
-    creates a stacked bar chart to represent the number of records per year for each city, and displays the plot in Streamlit. 
+    creates a stacked horizontal bar chart to represent the number of records per year for each city, and displays the plot in Streamlit. 
     The user can also download the plot as a PNG image.
     """
     # Calculate total records per city for sorting purposes
-    city_totals = dataframe.groupby('city')['num_records'].sum().sort_values(ascending=False)
+    city_totals = dataframe.groupby('city')['num_records'].sum().sort_values(ascending=True)
 
     # Convert city names to Title case for better readability
     dataframe['city'] = dataframe['city'].str.replace('_', ' ').str.title()
@@ -150,18 +150,18 @@ def city_composition_visualization(dataframe: pd.DataFrame):
     df_pivot = df_sorted.pivot(index='city', columns='year', values='num_records').fillna(0)
 
     # Set up the figure size and style
-    plt.figure(figsize=(16, 10))
+    plt.figure(figsize=(12, 18))  # Adjusted size for horizontal chart
     sns.set(style="whitegrid")
 
-    # Plot the data
-    ax = df_pivot.plot(kind='bar', stacked=True, figsize=(16, 10), colormap="tab20")
+    # Plot the data with horizontal bars
+    ax = df_pivot.plot(kind='barh', stacked=True, figsize=(12, 18), colormap="tab20")
 
     # Add titles and labels
     plt.title('Number of Records per Year and per City (Sorted by Total Count)', fontsize=20)
-    plt.xlabel('City', fontsize=16)
-    plt.ylabel('Number of Records', fontsize=16)
-    plt.xticks(rotation=90, ha='right', fontsize=12)
-    plt.yticks(fontsize=12)
+    plt.xlabel('Number of Records', fontsize=16)  # Note x-axis is now showing the number of records
+    plt.ylabel('City', fontsize=16)  # y-axis shows the cities
+    plt.xticks(fontsize=12)
+    plt.yticks(rotation=0, fontsize=12)  # No rotation for readability
     plt.legend(title="Year", bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=10)
 
     # Adjust layout for readability
@@ -183,10 +183,12 @@ def city_composition_visualization(dataframe: pd.DataFrame):
         mime="image/png"
     )
 
+
 def category_composition_visualization(dataframe: pd.DataFrame):
     """
-    Visualizes the number of records per year for each category using a stacked bar chart. The function sorts cities by the total count of records, 
-    replaces category names to Title case for better readability, and allows the user to download the resulting plot.
+    Visualizes the number of records per year for each category using a stacked horizontal bar chart. 
+    The function sorts categories by the total count of records, replaces category names to Title case for better readability, 
+    and allows the user to download the resulting plot.
     
     Args:
         dataframe (pd.DataFrame): A DataFrame with the following columns:
@@ -194,19 +196,19 @@ def category_composition_visualization(dataframe: pd.DataFrame):
             - 'year': Year of the records.
             - 'num_records': Number of records for each category per year.
     
-    The function sorts cities by the total count of records in descending order, converts category names from snake_case to Title case, 
-    creates a stacked bar chart to represent the number of records per year for each category, and displays the plot in Streamlit. 
+    The function sorts categories by the total count of records in descending order, converts category names from snake_case to Title case, 
+    creates a stacked horizontal bar chart to represent the number of records per year for each category, and displays the plot in Streamlit. 
     The user can also download the plot as a PNG image.
     """
     # Calculate total records per category for sorting purposes
-    category_totals = dataframe.groupby('category')['num_records'].sum().sort_values(ascending=False)
+    category_totals = dataframe.groupby('category')['num_records'].sum().sort_values(ascending=True)
 
     # Convert category names to Title case for better readability
     dataframe['category'] = dataframe['category'].str.replace('_', ' ').str.title()
 
-    # Re-order the cities in the dataframe according to total record counts in descending order
-    sorted_cities = category_totals.index.str.replace('_', ' ').str.title()
-    dataframe['category'] = pd.Categorical(dataframe['category'], categories=sorted_cities, ordered=True)
+    # Re-order the categories in the dataframe according to total record counts in descending order
+    sorted_categories = category_totals.index.str.replace('_', ' ').str.title()
+    dataframe['category'] = pd.Categorical(dataframe['category'], categories=sorted_categories, ordered=True)
     df_sorted = dataframe.sort_values('category')
 
     # Pivot the DataFrame for better visualization - Grouped by category and years as values
@@ -216,15 +218,15 @@ def category_composition_visualization(dataframe: pd.DataFrame):
     plt.figure(figsize=(16, 10))
     sns.set(style="whitegrid")
 
-    # Plot the data
-    ax = df_pivot.plot(kind='bar', stacked=True, figsize=(16, 10), colormap="tab20")
+    # Plot the data using a horizontal bar chart
+    ax = df_pivot.plot(kind='barh', stacked=True, figsize=(16, 10), colormap="tab20")
 
     # Add titles and labels
-    plt.title('Number of Records per Year and per category (Sorted by Total Count)', fontsize=20)
-    plt.xlabel('category', fontsize=16)
-    plt.ylabel('Number of Records', fontsize=16)
-    plt.xticks(rotation=90, ha='right', fontsize=12)
-    plt.yticks(fontsize=12)
+    plt.title('Number of Records per Year and per Category (Sorted by Total Count)', fontsize=20)
+    plt.xlabel('Number of Records', fontsize=16)
+    plt.ylabel('Category', fontsize=16)
+    plt.xticks(fontsize=12)
+    plt.yticks(rotation=0, fontsize=12)
     plt.legend(title="Year", bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=10)
 
     # Adjust layout for readability
@@ -361,13 +363,13 @@ def lineplot_per_category_nationwide(dataframe: pd.DataFrame,
     
     # Adding vertical lines for major events with different colors
     events = [
-        ('2013-08-19', 'National Strike (19 days)', '#d62728'),  # Red for strikes
-        ('2016-05-30', 'National Strike (13 days)', '#d62728'),  # Red for strikes
-        ('2016-11-24', 'Peace Deal with FARC', '#2ca02c'),  # Green for Peace Deal
-        ('2019-11-20', 'National Strike (14 days)', '#d62728'),  # Red for strikes
-        ('2020-03-01', 'COVID-19', '#1f77b4'),         # Blue for COVID-19
-        ('2021-04-28', 'National Strike (48 days)', '#d62728'),  # Red for strikes
-        ('2024-09-01', 'National Strike (6 days)', '#d62728'),  # Red for the recent strike during Petro's term
+        ('2013-08-19', 'National Strike (19 days)', '#d62728'),  # Paro Agrarrio 2013
+        ('2016-05-30', 'National Strike (13 days)', '#d62728'),  # Paro camionero 2016
+        ('2016-11-24', 'Peace Deal with FARC', '#2ca02c'),  # Acuerdo de paz con FARC
+        ('2020-03-01', 'COVID-19', '#1f77b4'),         # covid
+        ('2021-04-28', 'National Strike (48 days)', '#d62728'),  # Paro nacional (2do de Duque)
+        ('2024-09-01', 'National Strike (6 days)', '#d62728'),  # Paro Camionero 2024
+        ('2019-11-20', 'National Strike (14 days)', '#d62728'),  # Paro nacional (1ro de Duque)
     ]
 
     event_legend_labels = []
@@ -403,3 +405,104 @@ def lineplot_per_category_nationwide(dataframe: pd.DataFrame,
 
 
 
+def plot_product_seasonal_trends(dataframe: pd.DataFrame,
+                                 product:str, 
+                                 city:str = None):
+    """
+    Creates a line plot showing the average price of the product of intererst over time to examine seasonal trends.
+
+    Args:
+        dataframe (pd.DataFrame): The data to plot with columns 'date' and 'avg_price'.
+        product (str): product of interest. 
+    """
+    # Set up the figure size and style
+    plt.figure(figsize=(14, 8))
+    sns.set(style="whitegrid")
+
+    # Plot the average garlic price over time
+    plt.plot(dataframe['date'], dataframe['avg_price'], linestyle='-', color='b')
+
+    # Add title and labels
+    if city is not None:
+        plt.title(f'Seasonal Price Trends of {product} Over Time ({city.title()})', fontsize=22, weight='bold')
+    else:
+        plt.title(f'Seasonal Price Trends of {product} Over Time', fontsize=22, weight='bold')
+    plt.xlabel('Date', fontsize=16)
+    plt.ylabel('Average Price', fontsize=16)
+    plt.xticks(rotation=45, fontsize=12)
+    plt.yticks(fontsize=12)
+
+    # Display the plot with tight layout for readability
+    plt.tight_layout()
+    st.pyplot(plt)
+
+    # Save the plot to a BytesIO buffer for download
+    buf = BytesIO()
+    plt.savefig(buf, format="png")
+    buf.seek(0)
+
+    # Provide a download button for the plot
+    if city is not None: 
+        st.download_button(
+            label=f"Download Price Trend Plot as PNG",
+            data=buf,
+            file_name=f"{product}_price_trend_{city}.png",
+            mime="image/png"
+        )
+    else: 
+        st.download_button(
+            label=f"Download Price Trend Plot as PNG",
+            data=buf,
+            file_name=f"{product}_price_trend.png",
+            mime="image/png"
+        )
+
+def plot_price_distribution(dataframe: pd.DataFrame, category: str):
+    """
+    Plots a boxplot showing the average price distribution of a given product category across different marketplaces.
+
+    Args:
+        dataframe (pd.DataFrame): A DataFrame containing columns 'category', 'mercado', 'avg_price', and 'date'.
+        category (str): The category to filter and plot.
+    """
+    # Filter the dataframe for the given category
+    df_filtered = dataframe[dataframe['category'] == category]
+
+    # Set up the figure size and style
+    plt.figure(figsize=(16, 10))
+    sns.set(style="whitegrid")
+
+    # Create the boxplot
+    ax = sns.boxplot(
+        x='mercado', 
+        y='avg_price', 
+        data=df_filtered, 
+        palette="Set3",
+        showfliers=True  # Show outliers
+    )
+
+    # Add title and labels
+    plt.title(f'Price Distributions for {category.title()} Across Different Marketplaces', fontsize=20)
+    plt.xlabel('Marketplace', fontsize=16)
+    plt.ylabel('Average Price', fontsize=16)
+    plt.xticks(rotation=45, ha='right', fontsize=12)
+    plt.yticks(fontsize=12)
+
+    # Adjust layout for readability
+    plt.tight_layout()
+
+    # Display the plot using Streamlit
+    st.pyplot(plt)
+
+    # Save the plot to a BytesIO buffer for download
+    buf = BytesIO()
+    plt.savefig(buf, format="png")
+    buf.seek(0)
+
+    # Provide a download button for the plot
+    st.download_button(
+        label="Download Plot as PNG",
+        data=buf,
+        file_name=f"{category}_price_distribution.png",
+        mime="image/png"
+    )

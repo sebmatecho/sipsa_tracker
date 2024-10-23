@@ -64,6 +64,90 @@ def nation_wide_trend():
 	return dataframe
 
 
+def product_evolution_query(product:str):
+	query = f"""
+	SELECT 
+    pn.english_product AS product,
+    AVG(pp.precio_medio) AS avg_price,
+    pp.anho AS year,
+    pp.semana_no AS week,
+    date_trunc('year', to_date(pp.anho::text, 'YYYY')) + interval '1 week' * (pp.semana_no - 1) AS date
+FROM product_prices pp
+LEFT JOIN product_names pn ON pp.producto = pn.spanish_product
+WHERE pn.english_product = '{product}'
+GROUP BY pn.english_product, pp.anho, pp.semana_no
+ORDER BY pn.english_product, pp.anho, pp.semana_no;
+	"""
+	dataframe = run.queries_on_rds(query)
+	return dataframe
+
+def product_evolution_query_by_city(product:str, city:str):
+	query = f"""
+	SELECT 
+    pn.english_product AS product,
+    AVG(pp.precio_medio) AS avg_price,
+    pp.anho AS year,
+    pp.semana_no AS week,
+    date_trunc('year', to_date(pp.anho::text, 'YYYY')) + interval '1 week' * (pp.semana_no - 1) AS date
+FROM product_prices pp
+LEFT JOIN product_names pn ON pp.producto = pn.spanish_product
+WHERE pn.english_product = '{product}'
+AND ciudad = '{city}'
+GROUP BY pn.english_product, pp.anho, pp.semana_no
+ORDER BY pn.english_product, pp.anho, pp.semana_no;
+	"""
+	dataframe = run.queries_on_rds(query)
+	return dataframe
+
+
+def marketplaces_dynamics_query(): 
+	query = """
+WITH category_avg AS (
+    SELECT 
+        cn.english_category AS category,
+        AVG(pp.precio_medio) AS national_avg_price,
+        pp.anho AS year,
+        pp.semana_no AS week,
+        date_trunc('year', to_date(anho::text, 'YYYY')) + interval '1 week' * (semana_no - 1) AS date
+    FROM product_prices pp
+    LEFT JOIN category_names cn ON pp.categoria = cn.spanish_category
+    GROUP BY cn.english_category, pp.anho, pp.semana_no
+)
+SELECT 
+    cn.english_category AS category,
+    pp.mercado,
+    AVG(pp.precio_medio) AS avg_price,
+    ca.national_avg_price,
+    pp.anho AS year,
+    pp.semana_no AS week,
+    date_trunc('year', to_date(anho::text, 'YYYY')) + interval '1 week' * (semana_no - 1) AS date
+FROM product_prices pp
+LEFT JOIN category_names cn ON pp.categoria = cn.spanish_category
+JOIN category_avg ca ON cn.english_category = ca.category AND pp.anho = ca.year AND pp.semana_no = ca.week
+GROUP BY cn.english_category, pp.mercado, ca.national_avg_price, pp.anho, pp.semana_no
+ORDER BY cn.english_category, pp.mercado, pp.anho, pp.semana_no;
+	"""
+	dataframe = run.queries_on_rds(query)
+	return dataframe
+
+
+def product_query():
+	query = """
+	SELECT DISTINCT english_product as product
+	FROM product_names;
+	"""
+	dataframe = run.queries_on_rds(query)
+	return dataframe
+
+def product_query_by_city(city):
+	query = f"""
+	SELECT DISTINCT english_product as product
+	FROM product_prices pp
+	LEFT JOIN product_names pn ON pp.producto = pn.spanish_product
+	WHERE ciudad = '{city}';
+	"""
+	dataframe = run.queries_on_rds(query)
+	return dataframe
 
 
 def city_query():

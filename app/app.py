@@ -32,11 +32,12 @@ visualization_type = st.sidebar.radio(
     "Analysis area",
     ("Introduction to SIPSA Project", 
      "Price Trends Across Time", 
+     "Individual Products",
     #  "City and Regional Comparisons", 
     #  "Category-Specific Trends",
     #  "Product Popularity and Trends",
     #  "Price Extremes and Anomalies",
-    #  "Market-Specific Insights", 
+     "Marketplaces Exploration", 
     #  "Relationship Between Prices and Trends" 
 	)
 )
@@ -96,18 +97,15 @@ if visualization_type == "Introduction to SIPSA Project":
     """)
 
 
-    
-
 if visualization_type == 'Price Trends Across Time':
       
       dataframe = queries.nation_wide_trend()
-      
       visuals.lineplot_per_category_nationwide(dataframe=dataframe, 
-                      numerical_value='mean_price',
-                      categorical_value='category',
-                      title='Price Evolution by Category (Nationwide)',
-                      xlabel='',
-                      ylabel='Average Price')
+                                                numerical_value='mean_price',
+                                                categorical_value='category',
+                                                title='Price Evolution by Category (Nationwide)',
+                                                xlabel='',
+                                                ylabel='Average Price')
 
 
 
@@ -129,11 +127,52 @@ if visualization_type == 'Price Trends Across Time':
 									ylabel = 'Average Price')
 
 
+if visualization_type ==  "Individual Products":
+     visual_type = st.radio(
+    "Would you like to see nation-wide trends or city-wide trends?",
+    ["Nation-wide", "City-wide", ],
+
+)
+     if visual_type == "Nation-wide":
+          
+        products_list= queries.product_query()
+        products_list = [product.title().replace('_',' ') for product in products_list['product'].to_list()]
+        product = st.selectbox("Product of interest", 
+                            products_list)
+        product = product.lower().replace(' ','_')
+        dataframe = queries.product_evolution_query(product = product)
+        visuals.plot_product_seasonal_trends(dataframe=dataframe, 
+                                            product = product.title().replace('_',' '))
+     else:
+        cities = queries.city_query()
+        cities_list = [city.title().replace('_',' ') for city in cities['ciudad'].to_list()]
+        city = st.selectbox("City of interest", 
+                          cities_list)
+        city = city.lower().replace(' ','_')
+        
 
 
+        products_list= queries.product_query_by_city(city =city)
+        products_list = [product.title().replace('_',' ') for product in products_list['product'].to_list()]
+        product = st.selectbox("Product of interest", 
+                            products_list)
+        product = product.lower().replace(' ','_')
+        dataframe = queries.product_evolution_query_by_city(product = product, 
+                                                            city = city)
+        visuals.plot_product_seasonal_trends(dataframe=dataframe, 
+                                            product = product.title().replace('_',' '), 
+                                            city = city)
+        
 
+if visualization_type =='Marketplaces Exploration':
+    dataframe = queries.marketplaces_dynamics_query()
+    category_list = list(dataframe['category'].unique())
+    category = st.selectbox("Category of interest", 
+                            category_list)
+    visuals.plot_price_distribution(dataframe = dataframe, 
+                                    category = category)
 
-
+        
 # Footer
 st.sidebar.write("SIPSA project APP - Streamlit")
 
