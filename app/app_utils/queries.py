@@ -131,6 +131,38 @@ ORDER BY cn.english_category, pp.mercado, pp.anho, pp.semana_no;
 	return dataframe
 
 
+def marketplaces_product_dynamics_query(product:str): 
+	query = f"""
+WITH product_avg AS (
+    SELECT 
+        cn.english_product AS product,
+        AVG(pp.precio_medio) AS national_avg_price,
+        pp.anho AS year,
+        pp.semana_no AS week,
+        date_trunc('year', to_date(anho::text, 'YYYY')) + interval '1 week' * (semana_no - 1) AS date
+    FROM product_prices pp
+    LEFT JOIN product_names cn ON pp.producto = cn.spanish_product
+	WHERE cn.english_product = '{product}'
+    GROUP BY cn.english_product, pp.anho, pp.semana_no
+)
+SELECT 
+    cn.english_product AS product,
+    pp.mercado,
+    AVG(pp.precio_medio) AS avg_price,
+    ca.national_avg_price,
+    pp.anho AS year,
+    pp.semana_no AS week,
+    date_trunc('year', to_date(anho::text, 'YYYY')) + interval '1 week' * (semana_no - 1) AS date
+FROM product_prices pp
+LEFT JOIN product_names cn ON pp.producto = cn.spanish_product
+JOIN product_avg ca ON cn.english_product = ca.product AND pp.anho = ca.year AND pp.semana_no = ca.week
+GROUP BY cn.english_product, pp.mercado, ca.national_avg_price, pp.anho, pp.semana_no
+ORDER BY cn.english_product, pp.mercado, pp.anho, pp.semana_no;
+	"""
+	dataframe = run.queries_on_rds(query)
+	return dataframe
+
+
 def product_query():
 	query = """
 	SELECT DISTINCT english_product as product

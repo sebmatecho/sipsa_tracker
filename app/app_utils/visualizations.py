@@ -457,7 +457,9 @@ def plot_product_seasonal_trends(dataframe: pd.DataFrame,
             mime="image/png"
         )
 
-def plot_price_distribution(dataframe: pd.DataFrame, category: str):
+def plot_price_distribution(dataframe: pd.DataFrame, 
+                            category: str = None, 
+                            product:str = None):
     """
     Plots a boxplot showing the average price distribution of a given product category across different marketplaces.
 
@@ -466,7 +468,10 @@ def plot_price_distribution(dataframe: pd.DataFrame, category: str):
         category (str): The category to filter and plot.
     """
     # Filter the dataframe for the given category
-    df_filtered = dataframe[dataframe['category'] == category]
+    if category is not None:
+        df_filtered = dataframe[dataframe['category'] == category]
+    if product is not None: 
+        df_filtered = dataframe[dataframe['product'] == product]
 
     # Set up the figure size and style
     plt.figure(figsize=(16, 10))
@@ -482,7 +487,10 @@ def plot_price_distribution(dataframe: pd.DataFrame, category: str):
     )
 
     # Add title and labels
-    plt.title(f'Price Distributions for {category.title()} Across Different Marketplaces', fontsize=20)
+    if category is not None:
+        plt.title(f'Price Distributions for {category.title()} Across Different Marketplaces', fontsize=20)
+    if product is not None:
+        plt.title(f'Price Distributions for {product.title()} Across Different Marketplaces', fontsize=20)
     plt.xlabel('Marketplace', fontsize=16)
     plt.ylabel('Average Price', fontsize=16)
     plt.xticks(rotation=45, ha='right', fontsize=12)
@@ -500,9 +508,18 @@ def plot_price_distribution(dataframe: pd.DataFrame, category: str):
     buf.seek(0)
 
     # Provide a download button for the plot
-    st.download_button(
-        label="Download Plot as PNG",
-        data=buf,
-        file_name=f"{category}_price_distribution.png",
-        mime="image/png"
-    )
+    if category is not None: 
+        st.download_button(
+            label="Download Plot as PNG",
+            data=buf,
+            file_name=f"{category}_price_distribution.png",
+            mime="image/png"
+        )
+
+    if product is not None: 
+        st.download_button(
+            label="Download Plot as PNG",
+            data=buf,
+            file_name=f"{product}_price_distribution.png",
+            mime="image/png"
+        )

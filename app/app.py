@@ -165,14 +165,37 @@ if visualization_type ==  "Individual Products":
         
 
 if visualization_type =='Marketplaces Exploration':
-    dataframe = queries.marketplaces_dynamics_query()
-    category_list = list(dataframe['category'].unique())
-    category = st.selectbox("Category of interest", 
-                            category_list)
-    visuals.plot_price_distribution(dataframe = dataframe, 
-                                    category = category)
 
-        
+    visual_type = st.radio(
+    "Would you like to see product-wide trends or category-wide trends?",
+    ["Product-wide", "Category-wide"],
+    )
+    if visual_type == "Category-wide":
+    
+        dataframe = queries.marketplaces_dynamics_query()
+        category_list = list(dataframe['category'].unique())
+        category_list = [category.title().replace('_',' ') for category in category_list]
+        category = st.selectbox("Category of interest", 
+                                category_list)
+        category = category.lower().replace(' ','_')
+        visuals.plot_price_distribution(dataframe = dataframe, 
+                                        category = category)
+
+    else: 
+        products_list= queries.product_query()
+        products_list = [product.title().replace('_',' ') for product in products_list['product'].to_list()]
+        product = st.selectbox("Product of interest", 
+                            products_list)
+        product = product.lower().replace(' ','_')
+
+
+        dataframe = queries.marketplaces_product_dynamics_query(product = product)
+        visuals.plot_price_distribution(dataframe = dataframe, 
+                                        product = product)
+
+
+
+
 # Footer
 st.sidebar.write("SIPSA project APP - Streamlit")
 
