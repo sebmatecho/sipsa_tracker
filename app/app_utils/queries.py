@@ -1,5 +1,6 @@
 from app_utils import aws
-
+from typing import List
+import pandas as pd
 run = aws.AppDataManager()
 
 def city_composition_query(): 
@@ -81,19 +82,21 @@ ORDER BY pn.english_product, pp.anho, pp.semana_no;
 	dataframe = run.queries_on_rds(query)
 	return dataframe
 
-def product_evolution_query_by_city(product:str, city:str):
+def product_evolution_query_by_city(product:str, cities:List[str]):
+	cities = "','".join(cities)
 	query = f"""
 	SELECT 
     pn.english_product AS product,
     AVG(pp.precio_medio) AS avg_price,
     pp.anho AS year,
+	pp.ciudad as city,
     pp.semana_no AS week,
     date_trunc('year', to_date(pp.anho::text, 'YYYY')) + interval '1 week' * (pp.semana_no - 1) AS date
 FROM product_prices pp
 LEFT JOIN product_names pn ON pp.producto = pn.spanish_product
 WHERE pn.english_product = '{product}'
-AND ciudad = '{city}'
-GROUP BY pn.english_product, pp.anho, pp.semana_no
+AND ciudad IN ('{cities}')
+GROUP BY pp.ciudad, pn.english_product, pp.anho, pp.semana_no
 ORDER BY pn.english_product, pp.anho, pp.semana_no;
 	"""
 	dataframe = run.queries_on_rds(query)
@@ -171,14 +174,15 @@ def product_query():
 	dataframe = run.queries_on_rds(query)
 	return dataframe
 
-def product_query_by_city(city):
+def product_query_by_city(cities:List[str]):
+	cities = "','".join(cities)
 	query = f"""
 	SELECT DISTINCT english_product as product
 	FROM product_prices pp
 	LEFT JOIN product_names pn ON pp.producto = pn.spanish_product
-	WHERE ciudad = '{city}';
+	WHERE ciudad IN ('{cities}');
 	"""
-	dataframe = run.queries_on_rds(query)
+	dataframe =run.queries_on_rds(query)
 	return dataframe
 
 

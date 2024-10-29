@@ -403,9 +403,7 @@ def lineplot_per_category_nationwide(dataframe: pd.DataFrame,
         mime="image/png"
     )
 
-
-
-def plot_product_seasonal_trends(dataframe: pd.DataFrame,
+def plot_product_seasonal_trends_national(dataframe: pd.DataFrame,
                                  product:str, 
                                  city:str = None):
     """
@@ -456,6 +454,61 @@ def plot_product_seasonal_trends(dataframe: pd.DataFrame,
             file_name=f"{product}_price_trend.png",
             mime="image/png"
         )
+
+def plot_product_seasonal_trends(dataframe: pd.DataFrame,
+                                 product: str,
+                                 cities: list = None):
+    """
+    Creates a line plot showing the average price of the product of interest over time for multiple cities to examine seasonal trends.
+
+    Args:
+        dataframe (pd.DataFrame): The data to plot with columns 'date', 'avg_price', and 'city'.
+        product (str): The product of interest.
+        cities (list): List of city names to include in the plot.
+    """
+    # Set up the figure size and style
+    plt.figure(figsize=(14, 8))
+    sns.set(style="whitegrid")
+
+    # If cities are specified, filter the dataframe to only include those cities
+    if cities is not None:
+        dataframe = dataframe[dataframe['city'].isin(cities)]
+
+    # Plot the average price for each city
+    for city in dataframe['city'].unique():
+        city_data = dataframe[dataframe['city'] == city]
+        plt.plot(city_data['date'], city_data['avg_price'], label=city.title(), linestyle='-', marker=None)
+
+    # Add title and labels
+    if cities is not None:
+        cities_str = ', '.join([city.title() for city in cities])
+        plt.title(f'Seasonal Price Trends of {product} Over Time ({cities_str})', fontsize=22, weight='bold')
+    else:
+        plt.title(f'Seasonal Price Trends of {product} Over Time', fontsize=22, weight='bold')
+
+    plt.xlabel('Date', fontsize=16)
+    plt.ylabel('Average Price', fontsize=16)
+    plt.xticks(rotation=45, fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.legend(title='City', fontsize=12, title_fontsize=14)
+
+    # Display the plot with tight layout for readability
+    plt.tight_layout()
+    st.pyplot(plt)
+
+    # Save the plot to a BytesIO buffer for download
+    buf = BytesIO()
+    plt.savefig(buf, format="png")
+    buf.seek(0)
+
+    # Provide a download button for the plot
+    cities_suffix = "_".join([city.lower().replace(' ', '_') for city in cities]) if cities else "all"
+    st.download_button(
+        label=f"Download Price Trend Plot as PNG",
+        data=buf,
+        file_name=f"{product}_price_trend_{cities_suffix}.png",
+        mime="image/png"
+    )
 
 def plot_price_distribution(dataframe: pd.DataFrame, 
                             category: str = None, 

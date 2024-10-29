@@ -141,27 +141,27 @@ if visualization_type ==  "Individual Products":
                             products_list)
         product = product.lower().replace(' ','_')
         dataframe = queries.product_evolution_query(product = product)
-        visuals.plot_product_seasonal_trends(dataframe=dataframe, 
+        visuals.plot_product_seasonal_trends_national(dataframe=dataframe, 
                                             product = product.title().replace('_',' '))
      else:
         cities = queries.city_query()
         cities_list = [city.title().replace('_',' ') for city in cities['ciudad'].to_list()]
-        city = st.selectbox("City of interest", 
-                          cities_list)
-        city = city.lower().replace(' ','_')
+        cities = st.multiselect("Cities of interest", 
+                          cities_list, 
+                          ['Bogota'])
+        cities = [city.lower().replace(' ','_') for city in cities]
         
 
-
-        products_list= queries.product_query_by_city(city =city)
+        products_list= queries.product_query_by_city(cities = cities)
         products_list = [product.title().replace('_',' ') for product in products_list['product'].to_list()]
         product = st.selectbox("Product of interest", 
                             products_list)
         product = product.lower().replace(' ','_')
         dataframe = queries.product_evolution_query_by_city(product = product, 
-                                                            city = city)
+                                                            cities = cities)
         visuals.plot_product_seasonal_trends(dataframe=dataframe, 
                                             product = product.title().replace('_',' '), 
-                                            city = city)
+                                            cities = cities)
         
 
 if visualization_type =='Marketplaces Exploration':
