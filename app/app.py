@@ -38,6 +38,7 @@ visualization_type = st.sidebar.radio(
     #  "Product Popularity and Trends",
     #  "Price Extremes and Anomalies",
      "Marketplaces Exploration", 
+     "Seasonal Descomposition"
     #  "Relationship Between Prices and Trends" 
 	)
 )
@@ -193,9 +194,16 @@ if visualization_type =='Marketplaces Exploration':
         visuals.plot_price_distribution(dataframe = dataframe, 
                                         product = product)
 
-
-
-
+if visualization_type =='Seasonal Descomposition':
+    products_list= queries.product_query()
+    products_list = [product.title().replace('_',' ') for product in products_list['product'].to_list()]
+    product = st.selectbox("Product of interest", 
+                            products_list)
+    product = product.lower().replace(' ','_') 
+    dataframe = queries.product_price_evolution(product = product)
+    product = product.title().replace('_',' ') 
+    visuals.plot_seasonal_decomposition(dataframe = dataframe, 
+                                        product = product)
 # Footer
 st.sidebar.write("SIPSA project APP - Streamlit")
 

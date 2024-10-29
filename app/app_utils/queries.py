@@ -102,6 +102,23 @@ ORDER BY pn.english_product, pp.anho, pp.semana_no;
 	dataframe = run.queries_on_rds(query)
 	return dataframe
 
+def product_price_evolution(product:str):
+	
+	query = f"""
+SELECT 
+    pn.english_product AS product,
+    pp.ciudad AS city,
+    AVG(pp.precio_medio) AS avg_price,
+    date_trunc('year', to_date(pp.anho::text, 'YYYY')) + interval '1 week' * (pp.semana_no - 1) AS date
+FROM product_prices pp
+LEFT JOIN product_names pn ON pp.producto = pn.spanish_product
+WHERE pn.english_product = '{product}'
+GROUP BY pn.english_product, pp.ciudad, pp.anho, pp.semana_no
+ORDER BY pn.english_product, pp.ciudad, pp.anho, pp.semana_no;
+
+	"""
+	dataframe = run.queries_on_rds(query)
+	return dataframe
 
 def marketplaces_dynamics_query(): 
 	query = """

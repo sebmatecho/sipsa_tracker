@@ -2,6 +2,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
 import statsmodels.api as sm
+from statsmodels.tsa.seasonal import seasonal_decompose
 import pandas as pd
 from io import BytesIO
 
@@ -576,3 +577,72 @@ def plot_price_distribution(dataframe: pd.DataFrame,
             file_name=f"{product}_price_distribution.png",
             mime="image/png"
         )
+
+
+def plot_seasonal_decomposition(dataframe: pd.DataFrame, 
+                                product: str, 
+                                cities: list = None):
+    """
+    Creates subplots for seasonal decomposition (trend, seasonality, residuals) of the product price data over time.
+    
+    Args:
+        dataframe (pd.DataFrame): Data containing columns 'date', 'avg_price', and 'city'.
+        product (str): The product name to display in the plot title.
+        cities (list): A list of cities to include in the decomposition.
+    """
+    # Filter the dataframe based on the selected cities
+    if cities is not None:
+        dataframe = dataframe[dataframe['city'].isin(cities)]
+    
+    # Set up the figure size and style
+    sns.set(style="whitegrid")
+    
+    # Decompose each city’s product data
+    for city in dataframe['city'].unique():
+        city_data = dataframe[dataframe['city'] == city].copy()
+        city_data.set_index('date', inplace=True)
+        
+        # Ensure data is sorted by date
+        city_data = city_data.sort_index()
+        
+        # Perform seasonal decomposition
+        decomposition = seasonal_decompose(city_data['avg_price'], model='multiplicative', period=52)  # Assuming weekly data, 52 weeks in a year
+        
+        # Plotting the seasonal decomposition
+        fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(14, 12))
+        fig.suptitle(f'Seasonal Decomposition of {product} Prices nation-wide', fontsize=22, weight='bold')
+
+        decomposition.observed.plot(ax=ax1, legend=False)
+        ax1.set_ylabel('Observed', fontsize=12)
+        ax1.set_xlabel('')
+
+        decomposition.trend.plot(ax=ax2, legend=False)
+        ax2.set_ylabel('Trend', fontsize=12)
+        ax2.set_xlabel('')
+
+        decomposition.seasonal.plot(ax=ax3, legend=False)
+        ax3.set_ylabel('Seasonal', fontsize=12)
+        ax3.set_xlabel('')
+
+        decomposition.resid.plot(ax=ax4, legend=False)
+        ax4.set_ylabel('Residual', fontsize=12)
+        ax4.set_xlabel('Date', fontsize=12)
+
+        plt.tight_layout(rect=[0, 0, 1, 0.96])
+        
+        # Display the plot using Streamlit
+        st.pyplot(fig)
+        
+        # Save the plot to a BytesIO buffer for download
+        buf = BytesIO()
+        plt.savefig(buf, format="png")
+        buf.seek(0)
+
+        # Provide a download button for the plot
+        st.download_button(
+            label=f"Download Seasonal Decomposition Plot as PNG",
+            data=buf,
+            file_name=f"{product}_seasonal_decomposition.png",
+            mime="image/png"
+        )
+        plt.close(fig)
