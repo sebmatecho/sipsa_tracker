@@ -17,9 +17,6 @@ from pathlib import Path
 from datetime import datetime
 import sys
 
-# Import the function to be tested
-# from your_module import setup_logger
-
 def test_setup_logger():
     # Mock the S3 resource
     mock_s3 = mock.Mock()

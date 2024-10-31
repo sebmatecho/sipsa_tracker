@@ -1,5 +1,5 @@
 from app_utils import aws
-from typing import List
+from typing import List, Union
 import pandas as pd
 run = aws.AppDataManager()
 
@@ -82,9 +82,15 @@ ORDER BY pn.english_product, pp.anho, pp.semana_no;
 	dataframe = run.queries_on_rds(query)
 	return dataframe
 
-def product_evolution_query_by_city(product:str, cities:List[str]):
-	cities = "','".join(cities)
-	query = f"""
+def product_evolution_query_by_city(product:str, cities: Union[str, List[str]]):
+		
+    # If `cities` is a single string, convert it into a list
+    if isinstance(cities, str):
+        cities = [cities]
+	
+    cities = "','".join(cities)
+
+    query = f"""
 	SELECT 
     pn.english_product AS product,
     AVG(pp.precio_medio) AS avg_price,
@@ -99,8 +105,8 @@ AND ciudad IN ('{cities}')
 GROUP BY pp.ciudad, pn.english_product, pp.anho, pp.semana_no
 ORDER BY pn.english_product, pp.anho, pp.semana_no;
 	"""
-	dataframe = run.queries_on_rds(query)
-	return dataframe
+    dataframe = run.queries_on_rds(query)
+    return dataframe
 
 def product_price_evolution(product:str):
 	
@@ -191,16 +197,35 @@ def product_query():
 	dataframe = run.queries_on_rds(query)
 	return dataframe
 
-def product_query_by_city(cities:List[str]):
-	cities = "','".join(cities)
-	query = f"""
-	SELECT DISTINCT english_product as product
-	FROM product_prices pp
-	LEFT JOIN product_names pn ON pp.producto = pn.spanish_product
-	WHERE ciudad IN ('{cities}');
-	"""
-	dataframe =run.queries_on_rds(query)
-	return dataframe
+def product_query_by_city(cities: Union[str, List[str]]):
+    """
+    Queries the distinct products available in the given cities.
+
+    Args:
+        cities (Union[str, List[str]]): A single city as a string or a list of city names.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the distinct products available in the specified city/cities.
+    """
+    # If `cities` is a single string, convert it into a list
+    if isinstance(cities, str):
+        cities = [cities]
+
+    # Join the list of cities into a single string for the SQL query
+    cities = "','".join(cities)
+    
+    query = f"""
+    SELECT DISTINCT english_product as product
+    FROM product_prices pp
+    LEFT JOIN product_names pn ON pp.producto = pn.spanish_product
+    WHERE ciudad IN ('{cities}');
+    """
+    
+    dataframe = run.queries_on_rds(query)
+    return dataframe
+
+
+
 
 
 def city_query():

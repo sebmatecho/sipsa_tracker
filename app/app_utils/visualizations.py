@@ -2,6 +2,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
 import statsmodels.api as sm
+from typing import Union
 from statsmodels.tsa.seasonal import seasonal_decompose
 import pandas as pd
 from io import BytesIO
@@ -579,20 +580,25 @@ def plot_price_distribution(dataframe: pd.DataFrame,
         )
 
 
+
 def plot_seasonal_decomposition(dataframe: pd.DataFrame, 
                                 product: str, 
-                                cities: list = None):
+                                city: Union[str, list] = None):
     """
     Creates subplots for seasonal decomposition (trend, seasonality, residuals) of the product price data over time.
     
     Args:
         dataframe (pd.DataFrame): Data containing columns 'date', 'avg_price', and 'city'.
         product (str): The product name to display in the plot title.
-        cities (list): A list of cities to include in the decomposition.
+        city (Union[str, list]): A single city or a list of cities to include in the decomposition.
     """
-    # Filter the dataframe based on the selected cities
-    if cities is not None:
-        dataframe = dataframe[dataframe['city'].isin(cities)]
+    # Ensure city input is always a list
+    if isinstance(city, str):
+        city = [city]
+    
+    # Filter the dataframe based on the selected city/cities
+    if city is not None:
+        dataframe = dataframe[dataframe['city'].isin(city)]
     
     # Set up the figure size and style
     sns.set(style="whitegrid")
@@ -610,7 +616,7 @@ def plot_seasonal_decomposition(dataframe: pd.DataFrame,
         
         # Plotting the seasonal decomposition
         fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(14, 12))
-        fig.suptitle(f'Seasonal Decomposition of {product} Prices nation-wide', fontsize=22, weight='bold')
+        fig.suptitle(f'Seasonal Decomposition of {product} Prices in {city.title()}', fontsize=22, weight='bold')
 
         decomposition.observed.plot(ax=ax1, legend=False)
         ax1.set_ylabel('Observed', fontsize=12)
@@ -640,9 +646,9 @@ def plot_seasonal_decomposition(dataframe: pd.DataFrame,
 
         # Provide a download button for the plot
         st.download_button(
-            label=f"Download Seasonal Decomposition Plot as PNG",
+            label=f"Download Seasonal Decomposition Plot as PNG ({city})",
             data=buf,
-            file_name=f"{product}_seasonal_decomposition.png",
+            file_name=f"{product}_seasonal_decomposition_{city}.png",
             mime="image/png"
         )
         plt.close(fig)

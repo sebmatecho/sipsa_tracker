@@ -195,15 +195,28 @@ if visualization_type =='Marketplaces Exploration':
                                         product = product)
 
 if visualization_type =='Seasonal Descomposition':
-    products_list= queries.product_query()
+    cities = queries.city_query()
+
+    cities_list = [city.title().replace('_',' ') for city in cities['ciudad'].to_list()]
+    city = st.selectbox("Cities of interest", 
+                                cities_list)
+    city = city.lower().replace(' ','_')
+   
+
+    products_list= queries.product_query_by_city(cities = city)
     products_list = [product.title().replace('_',' ') for product in products_list['product'].to_list()]
     product = st.selectbox("Product of interest", 
                             products_list)
-    product = product.lower().replace(' ','_') 
+    product = product.lower().replace(' ','_')
+
     dataframe = queries.product_price_evolution(product = product)
     product = product.title().replace('_',' ') 
+    st.write(product)
     visuals.plot_seasonal_decomposition(dataframe = dataframe, 
-                                        product = product)
+                                        product = product, 
+                                        city = city)
+    
+    
 # Footer
 st.sidebar.write("SIPSA project APP - Streamlit")
 
