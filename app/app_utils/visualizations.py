@@ -652,3 +652,61 @@ def plot_seasonal_decomposition(dataframe: pd.DataFrame,
             mime="image/png"
         )
         plt.close(fig)
+
+
+def plot_product_affordability_rank(dataframe: pd.DataFrame,
+                                    category:str, 
+                                    city: str):
+    """
+    Plots a bar chart to visualize the ranking of products based on affordability in a specific city.
+
+    Args:
+        dataframe (pd.DataFrame): Dataframe containing columns 'city', 'product', 'affordability_index', and 'affordability_rank'.
+        city (str): The city for which to visualize the product affordability ranking.
+    """
+    # Filter the dataframe for the specified city
+    city_data = dataframe[dataframe['city'] == city].sort_values(by='affordability_rank')
+
+    # Extract the top 10 and bottom 10 products by affordability
+    top_10_products = city_data.head(10)
+    bottom_10_products = city_data.tail(10)
+
+    # Concatenate the two DataFrames to display in the chart
+    plot_data = pd.concat([top_10_products, bottom_10_products])
+    plot_data['product'] = plot_data['product'].str.replace('_',' ').str.title()
+    # Set up the figure size and style
+    plt.figure(figsize=(10, 8))
+    sns.set(style="whitegrid")
+
+    # Plot the data using Seaborn
+    sns.barplot(data=plot_data, 
+                x='affordability_index', 
+                y='product', 
+                palette='viridis', 
+                order=plot_data['product'])
+    
+    # Add titles and labels
+    plt.title(f'{category.title().replace('_',' ')} Affordability Ranking in {city.title()} (Top & Bottom 10)', fontsize=20, weight='bold')
+    plt.xlabel('Affordability Index (% of Weekly Income)', fontsize=14)
+    plt.ylabel('Product', fontsize=14)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.tight_layout()
+
+    # Display the plot using Streamlit
+    st.pyplot(plt)
+
+    # Save the plot to a BytesIO buffer for download
+    buf = BytesIO()
+    plt.savefig(buf, format="png")
+    buf.seek(0)
+
+    # Provide a download button for the plot
+    st.download_button(
+        label=f"Download {category.title()} Affordability Rank Plot ({city.title()}) as PNG",
+        data=buf,
+        file_name=f"affordability_rank_{category}_{city}.png",
+        mime="image/png"
+    )
+
+    plt.close()

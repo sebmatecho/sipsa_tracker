@@ -108,6 +108,62 @@ ORDER BY pn.english_product, pp.anho, pp.semana_no;
     dataframe = run.queries_on_rds(query)
     return dataframe
 
+def affordability_category_by_city(category:str, 
+								   city:str):
+	query = f"""
+WITH product_price AS (
+    SELECT 
+        pp.ciudad AS city, 
+        pn.english_product AS product, 
+        AVG(pp.precio_medio) AS avg_price, 
+        pp.anho AS year, 
+        date_trunc('year', to_date(pp.anho::text, 'YYYY')) + interval '1 week' * (pp.semana_no - 1) AS date
+    FROM product_prices pp
+    LEFT JOIN product_names pn ON pp.producto = pn.spanish_product
+    LEFT JOIN category_names cn ON pp.categoria = cn.spanish_category
+    WHERE cn.english_category = '{category}'
+    AND pp.ciudad = '{city}'
+    GROUP BY pp.ciudad, pn.english_product, pp.anho, pp.semana_no
+),
+income_data AS (
+    SELECT city, year, AVG(monthly_income) AS avg_income
+    FROM min_wages
+    GROUP BY city, year
+),
+recent_data AS (
+    -- Filter for records from the last 60 days
+    SELECT *
+    FROM product_price
+    WHERE date >= CURRENT_DATE - INTERVAL '60 days'
+),
+affordability_data AS (
+    SELECT 
+        p.city, 
+        p.product, 
+        AVG(p.avg_price) AS avg_price,  -- Average price for each product over the last 60 days
+        AVG(i.avg_income) AS avg_income,  -- Average income over the last 60 days (in case income varies)
+        MAX(p.date) AS recent_date,  -- The most recent date for the product record
+        (AVG(p.avg_price) / (AVG(i.avg_income) / 4)) * 100 AS affordability_index  -- Percentage of weekly income required to buy a unit
+    FROM recent_data p
+    JOIN income_data i 
+        ON p.city = i.city AND p.year = i.year
+    GROUP BY p.city, p.product
+)
+SELECT 
+    city, 
+    product, 
+    avg_price, 
+    avg_income, 
+    recent_date, 
+    affordability_index,
+    RANK() OVER (PARTITION BY city ORDER BY affordability_index ASC) AS affordability_rank
+FROM affordability_data
+ORDER BY city, affordability_rank;
+"""
+	dataframe = run.queries_on_rds(query)
+	return dataframe
+
+
 def product_price_evolution(product:str):
 	
 	query = f"""
@@ -196,6 +252,15 @@ def product_query():
 	"""
 	dataframe = run.queries_on_rds(query)
 	return dataframe
+
+def category_query():
+	query = """
+	SELECT DISTINCT english_category as category
+	FROM category_names;
+	"""
+	dataframe = run.queries_on_rds(query)
+	return dataframe
+
 
 def product_query_by_city(cities: Union[str, List[str]]):
     """
