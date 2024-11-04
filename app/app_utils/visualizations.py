@@ -686,7 +686,8 @@ def plot_product_affordability_rank(dataframe: pd.DataFrame,
                 order=plot_data['product'])
     
     # Add titles and labels
-    plt.title(f'{category.title().replace('_',' ')} Affordability Ranking in {city.title()} (Top & Bottom 10)', fontsize=20, weight='bold')
+    category = category.title().replace('_',' ')
+    plt.title(f'{category} Affordability Ranking in {city.title()} (Top & Bottom 10)', fontsize=20, weight='bold')
     plt.xlabel('Affordability Index (% of Weekly Income)', fontsize=14)
     plt.ylabel('Product', fontsize=14)
     plt.xticks(fontsize=12)
