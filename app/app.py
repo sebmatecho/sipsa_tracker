@@ -7,6 +7,9 @@ from app_utils import queries
 from pathlib import Path
 from PIL import Image
 
+
+
+
 # Set up Streamlit page configuration
 st.set_page_config(
     page_title="SIPSA explorer",
@@ -52,16 +55,16 @@ if visualization_type == "Hi, I'm SIPSApp! 👋":
     st.markdown("""
     ### Welcome to SIPSApp! 
     
-This application provides an interactive platform for exploring food price trends in Colombia. Using data provided by the Colombian Administrative Department of Statistics - [DANE](), the Sistema de Información de Precios y Abastecimiento del Sector Agropecuario [SIPSA](https://www.dane.gov.co/index.php/estadisticas-por-tema/agropecuario/sistema-de-informacion-de-precios-sipsa) is a comprehensive system for monitoring how food prices behave across cities and regions of Colombia.
+This application provides an interactive platform for exploring food price trends in Colombian marketplaces. Using data provided by the Colombian Administrative Department of Statistics - [DANE](), the Sistema de Información de Precios y Abastecimiento del Sector Agropecuario [SIPSA](https://www.dane.gov.co/index.php/estadisticas-por-tema/agropecuario/sistema-de-informacion-de-precios-sipsa) is a comprehensive system for monitoring how food prices behave across cities and regions of Colombia.
 
 With this tool, you'll be able to visualize:
 
-- **Price** trends across time for different food products.
+- Price trends across time for different food products.
 - City and regional price comparisons, highlighting disparities in affordability.
 - Category-specific trends to see which food groups have undergone significant changes.
 - Affordability metrics for different categories to understand which food groups are becoming more or less accessible.
                 
-We aim to help everyone—from researchers, policymakers, farmers, businesses, to everyday consumers—understand and engage with Colombian food pricing dynamics. Our interactive tool provides deep insights into food price behavior and promotes data-driven decision-making.
+SIPSApp aims to help everyone—from researchers, policymakers, farmers, businesses, to everyday consumers—understand and engage with Colombian food pricing dynamics. Our interactive tool provides deep insights into food price behavior and promotes data-driven decision-making.
 
 SIPSApp Features Include:
 
@@ -69,7 +72,8 @@ SIPSApp Features Include:
 - Individual Product Analysis: Look at trends for specific products, either across the country or within individual cities.
 - Product Affordability: Evaluate how different food products compare in terms of affordability, broken down by category and city.
 - Marketplaces Exploration: Compare food pricing across different marketplaces to understand regional disparities.
-- Seasonal Decomposition: Identify trends, seasonality, and anomalies by decomposing product price data over time.
+- Seasonal Decomposition: Identify trends, seasonality, and anomalies by decomposing product pr+-
+                ice data over time.
 
 How to Navigate:
 
@@ -80,7 +84,12 @@ How to Navigate:
     
     st.title("Composition of the SIPSA Database")
 
+    st.markdown("""
+                This is where you start! The introduction provides an overview of SIPSApp, along with some background on how the data is collected, processed, and presented. The composition of the dataset is illustrated with stacked bar charts that show the number of records per year and city and year and category, providing a sense of the data's coverage and granularity.
+                """)
+
     dataframe = queries.city_composition_query()
+
     visuals.city_composition_visualization(dataframe = dataframe)
 
     dataframe = queries.category_composition_query()
