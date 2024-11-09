@@ -43,7 +43,7 @@ visualization_type = st.sidebar.radio(
     #  "Price Extremes and Anomalies",
      "Product Affordability",
      "Marketplaces Exploration", 
-     "Seasonal Descomposition"
+    #  "Seasonal Descomposition"
     #  "Relationship Between Prices and Trends" 
 	)
 )
@@ -72,8 +72,7 @@ SIPSApp Features Include:
 - Individual Product Analysis: Look at trends for specific products, either across the country or within individual cities.
 - Product Affordability: Evaluate how different food products compare in terms of affordability, broken down by category and city.
 - Marketplaces Exploration: Compare food pricing across different marketplaces to understand regional disparities.
-- Seasonal Decomposition: Identify trends, seasonality, and anomalies by decomposing product pr+-
-                ice data over time.
+- Seasonal Decomposition: Identify trends, seasonality, and anomalies by decomposing product price data over time.
 
 How to Navigate:
 
@@ -172,6 +171,9 @@ if visualization_type ==  "Individual Products":
         
 
 if visualization_type =='Marketplaces Exploration':
+
+    dataframe = queries.marketplace_count_query()
+    visuals.plot_marketplace_count(dataframe = dataframe)
 
     visual_type = st.radio(
     "Would you like to see product-wide trends or category-wide trends?",

@@ -101,7 +101,7 @@ class FileNameBuilder:
         bucket = self.s3.Bucket(bucket_name)
         object_names = [obj.key for obj in bucket.objects.all() if obj.key.endswith(('.xls', '.xlsx'))]
 
-        second_format_years = {'2018', '2019', '2020', '2021', '2022', '2023', '2024'}
+        second_format_years = {'2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'}
         final_files_paths_second = []
 
         for path in object_names:
@@ -113,6 +113,7 @@ class FileNameBuilder:
                 week = int(Path(path).stem.split('_')[1])
 
                 if year in second_format_years:
+                    ### week 19 of 2018. Major format change!
                     if year == '2018' and week <= 19:
                         continue
                     final_files_paths_second.append(path)

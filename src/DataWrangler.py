@@ -192,8 +192,9 @@ class DataWrangler(FileNameBuilder):
 
         # Add timestamps
         try:
+            df_final['anho'] = Path(file_path).stem[-4:]      
             df_final['semana_no'] = int(Path(file_path).stem.split('_')[1])
-            df_final['anho'] = Path(file_path).stem[-4:]
+            
         except Exception as e:
             self.logger.error(f"Error extracting week and year from {file_path}: {e}")
             df_final['semana_no'] = None

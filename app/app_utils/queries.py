@@ -301,4 +301,12 @@ def city_query():
     dataframe = run.queries_on_rds(query)
     return dataframe
 
+def marketplace_count_query(): 
+	query = """
+    SELECT mercado, count(*) as mercado_count FROM product_prices 
+    GROUP BY mercado
+    ORDER BY mercado_count DESC;
+	"""
+	dataframe = run.queries_on_rds(query)
+	return dataframe
 

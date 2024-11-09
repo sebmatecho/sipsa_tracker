@@ -711,3 +711,36 @@ def plot_product_affordability_rank(dataframe: pd.DataFrame,
     )
 
     plt.close()
+
+def plot_marketplace_count(dataframe:pd.DataFrame):
+    # Plotting the figure using Streamlit
+    sns.set(style='whitegrid')
+
+    dataframe['mercado'] = dataframe['mercado'].str.replace('_',' ')
+    fig, ax = plt.subplots(figsize=(16, 8))
+    sns.barplot(data=dataframe, x='mercado', y='mercado_count', ax=ax)
+
+    # Add title and labels
+    ax.set_title('Marketplace Distribution', fontsize=20, weight='bold')
+    ax.set_ylabel('Record Count', fontsize=16)
+    ax.set_xlabel('Marketplace', fontsize=16)
+    ax.set_xticklabels(ax.get_xticklabels(), fontsize=12, rotation=90)
+
+    # Use tight layout for readability
+    plt.tight_layout()
+
+    # Display the plot with Streamlit
+    st.pyplot(fig)
+
+    # Save the plot to a buffer to provide a download button
+    from io import BytesIO
+    buf = BytesIO()
+    fig.savefig(buf, format="png")
+    buf.seek(0)
+
+    st.download_button(
+        label="Download Marketplace Distribution Plot as PNG",
+        data=buf,
+        file_name="marketplace_distribution.png",
+        mime="image/png"
+    )
