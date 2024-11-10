@@ -801,6 +801,6 @@ def greatest_price_changes(dataframe: pd.DataFrame,
     st.download_button(
         label="Download Plot as PNG",
         data=buf,
-        file_name="price_changes_plot_{city}.png",
+        file_name=f"price_changes_plot_{city}.png",
         mime="image/png"
     )   
