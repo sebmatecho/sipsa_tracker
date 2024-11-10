@@ -1,9 +1,9 @@
-# **SIPSApp - Exploring Colombian Food Prices**  
+# **SIPSApp: Exploring Colombian Food Prices** 🥑🍖📊  
 #### by [Sébastien Lozano-Forero](https://www.linkedin.com/in/sebastienlozanoforero/)
 
 ## **Overview**
 
-The **Food Prices Tracker** is a comprehensive data analysis platform that provides insights into food price dynamics in Colombia using weekly data published by **DANE (Departamento Administrativo Nacional de Estadística)**, the national statistical office of Colombia. This project automates the collection, cleaning, validation, and analysis of the **SIPSA (Sistema de Información de Precios del Sector Agropecuario)** dataset to provide data-driven insights into agricultural pricing.
+**SIPSApp** is a comprehensive data analysis platform that provides insights into food price dynamics in Colombia using weekly data published by **DANE (Departamento Administrativo Nacional de Estadística)**, the national statistical office of Colombia. This project automates the collection, cleaning, validation, and analysis of the **SIPSA (Sistema de Información de Precios del Sector Agropecuario)** dataset to provide data-driven insights into agricultural pricing.
 
 ### **Project Purpose and Importance**
 
