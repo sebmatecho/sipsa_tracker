@@ -213,36 +213,170 @@ ORDER BY cn.english_category, pp.mercado, pp.anho, pp.semana_no;
 	return dataframe
 
 
-def marketplaces_product_dynamics_query(product:str): 
-	query = f"""
-WITH product_avg AS (
-    SELECT 
-        cn.english_product AS product,
-        AVG(pp.precio_medio) AS national_avg_price,
-        pp.anho AS year,
-        pp.semana_no AS week,
-        date_trunc('year', to_date(anho::text, 'YYYY')) + interval '1 week' * (semana_no - 1) AS date
-    FROM product_prices pp
-    LEFT JOIN product_names cn ON pp.producto = cn.spanish_product
-	WHERE cn.english_product = '{product}'
-    GROUP BY cn.english_product, pp.anho, pp.semana_no
-)
-SELECT 
-    cn.english_product AS product,
-    pp.mercado,
-    AVG(pp.precio_medio) AS avg_price,
-    ca.national_avg_price,
-    pp.anho AS year,
-    pp.semana_no AS week,
-    date_trunc('year', to_date(anho::text, 'YYYY')) + interval '1 week' * (semana_no - 1) AS date
-FROM product_prices pp
-LEFT JOIN product_names cn ON pp.producto = cn.spanish_product
-JOIN product_avg ca ON cn.english_product = ca.product AND pp.anho = ca.year AND pp.semana_no = ca.week
-GROUP BY cn.english_product, pp.mercado, ca.national_avg_price, pp.anho, pp.semana_no
-ORDER BY cn.english_product, pp.mercado, pp.anho, pp.semana_no;
-	"""
-	dataframe = run.queries_on_rds(query)
-	return dataframe
+def major_price_changes_city_query(city:str,category:str= None):
+    query = f"""
+    WITH latest_two_weeks AS (
+        SELECT 
+            pp.ciudad AS city, 
+            pn.english_product AS product, 
+            pp.semana_no AS week, 
+            pp.anho AS year, 
+            AVG(pp.precio_medio) AS avg_price, 
+            date_trunc('year', to_date(pp.anho::text, 'YYYY')) + interval '1 week' * (pp.semana_no - 1) AS date
+        FROM product_prices pp
+        LEFT JOIN product_names pn ON pp.producto = pn.spanish_product
+		LEFT JOIN category_names cn ON pp.categoria = cn.spanish_category
+        WHERE date_trunc('year', to_date(pp.anho::text, 'YYYY')) + interval '1 week' * (pp.semana_no - 1) >= (
+            SELECT MAX(date_trunc('year', to_date(pp.anho::text, 'YYYY')) + interval '1 week' * (pp.semana_no - 1)) - interval '7 days' 
+            FROM product_prices pp
+        )
+        AND pp.ciudad = '{city}'
+		AND cn.english_category = '{category}'
+        GROUP BY pp.ciudad, pn.english_product, pp.semana_no, pp.anho
+    ),
+    week_price_difference AS (
+        SELECT 
+            current.city,
+            current.product,
+            current.year,
+            current.week,
+            current.avg_price AS current_avg_price,
+            previous.avg_price AS previous_avg_price,
+            ((current.avg_price - previous.avg_price) / previous.avg_price) * 100 AS percentage_change
+        FROM latest_two_weeks current
+        LEFT JOIN latest_two_weeks previous 
+            ON current.product = previous.product 
+            AND current.city = previous.city
+            AND (
+                current.week = previous.week + 1 
+                OR (current.week = 1 AND previous.week = 52 AND current.year = previous.year + 1)
+            )
+        
+        WHERE previous.avg_price IS NOT NULL
+    )
+    -- Get top 20 most significant price increases and top 20 decreases
+    (
+        SELECT *
+        FROM week_price_difference
+        WHERE percentage_change > 0
+        ORDER BY percentage_change DESC
+        LIMIT 20
+    )
+    UNION ALL
+    (
+        SELECT *
+        FROM week_price_difference
+        WHERE percentage_change < 0
+        ORDER BY percentage_change ASC
+        LIMIT 20
+    )
+    ORDER BY percentage_change DESC;
+    """
+    dataframe = run.queries_on_rds(query = query) 
+    dataframe['product'] = dataframe['product'].str.replace('_',' ').str.title()
+    return dataframe
+
+
+# def marketplaces_product_dynamics_query(product:str): 
+# 	query = f"""
+# WITH product_avg AS (
+#     SELECT 
+#         cn.english_product AS product,
+#         AVG(pp.precio_medio) AS national_avg_price,
+#         pp.anho AS year,
+#         pp.semana_no AS week,
+#         date_trunc('year', to_date(anho::text, 'YYYY')) + interval '1 week' * (semana_no - 1) AS date
+#     FROM product_prices pp
+#     LEFT JOIN product_names cn ON pp.producto = cn.spanish_product
+# 	WHERE cn.english_product = '{product}'
+#     GROUP BY cn.english_product, pp.anho, pp.semana_no
+# )
+# SELECT 
+#     cn.english_product AS product,
+#     pp.mercado,
+#     AVG(pp.precio_medio) AS avg_price,
+#     ca.national_avg_price,
+#     pp.anho AS year,
+#     pp.semana_no AS week,
+#     date_trunc('year', to_date(anho::text, 'YYYY')) + interval '1 week' * (semana_no - 1) AS date
+# FROM product_prices pp
+# LEFT JOIN product_names cn ON pp.producto = cn.spanish_product
+# JOIN product_avg ca ON cn.english_product = ca.product AND pp.anho = ca.year AND pp.semana_no = ca.week
+# GROUP BY cn.english_product, pp.mercado, ca.national_avg_price, pp.anho, pp.semana_no
+# ORDER BY cn.english_product, pp.mercado, pp.anho, pp.semana_no;
+# 	"""
+# 	dataframe = run.queries_on_rds(query)
+# 	return dataframe
+
+# def major_price_changes_city_query(city: str, category: str = None):
+
+#     query = f"""
+#     WITH latest_two_weeks AS (
+#         SELECT 
+#             pp.ciudad AS city, 
+#             pn.english_product AS product, 
+#             pp.semana_no AS week, 
+#             pp.anho AS year, 
+#             AVG(pp.precio_medio) AS avg_price, 
+#             date_trunc('year', to_date(pp.anho::text, 'YYYY')) + interval '1 week' * (pp.semana_no - 1) AS date
+#         FROM product_prices pp
+#         LEFT JOIN product_names pn ON pp.producto = pn.spanish_product
+#         WHERE date_trunc('year', to_date(pp.anho::text, 'YYYY')) + interval '1 week' * (pp.semana_no - 1) >= (
+#             SELECT MAX(date_trunc('year', to_date(pp.anho::text, 'YYYY')) + interval '1 week' * (pp.semana_no - 1)) - interval '7 days' 
+#             FROM product_prices pp
+#         )
+#         AND pp.ciudad = '{city}'
+#     """
+    
+#     if category:
+#         query += f""" AND pn.english_category = '{category}'\n"""
+
+#     query += """
+#         GROUP BY pp.ciudad, pn.english_product, pp.semana_no, pp.anho
+#     ),
+#     week_price_difference AS (
+#         SELECT 
+#             current.city,
+#             current.product,
+#             current.year,
+#             current.week,
+#             current.avg_price AS current_avg_price,
+#             previous.avg_price AS previous_avg_price,
+#             ((current.avg_price - previous.avg_price) / previous.avg_price) * 100 AS percentage_change
+#         FROM latest_two_weeks current
+#         LEFT JOIN latest_two_weeks previous 
+#             ON current.product = previous.product 
+#             AND current.city = previous.city
+#             AND (
+#                 current.week = previous.week + 1 
+#                 OR (current.week = 1 AND previous.week = 52 AND current.year = previous.year + 1)
+#             )
+#         WHERE previous.avg_price IS NOT NULL
+#     )
+#     -- Get top 20 most significant price increases and top 20 decreases
+#     (
+#         SELECT *
+#         FROM week_price_difference
+#         WHERE percentage_change > 0
+#         ORDER BY percentage_change DESC
+#         LIMIT 20
+#     )
+#     UNION ALL
+#     (
+#         SELECT *
+#         FROM week_price_difference
+#         WHERE percentage_change < 0
+#         ORDER BY percentage_change ASC
+#         LIMIT 20
+#     )
+#     ORDER BY percentage_change DESC;
+#     """
+
+#     # Run the query and process the result
+#     dataframe = run.queries_on_rds(query=query)
+#     dataframe['product'] = dataframe['product'].str.replace('_', ' ').str.title()
+#     return dataframe
+
 
 
 def product_query():

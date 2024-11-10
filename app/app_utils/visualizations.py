@@ -744,3 +744,63 @@ def plot_marketplace_count(dataframe:pd.DataFrame):
         file_name="marketplace_distribution.png",
         mime="image/png"
     )
+
+
+def greatest_price_changes(dataframe: pd.DataFrame, 
+                           city:str):
+    increases_df = dataframe[dataframe['percentage_change'] > 0]
+    decreases_df = dataframe[dataframe['percentage_change'] < 0]
+
+    # Set up the figure size and style
+    sns.set(style="whitegrid")
+    fig, axes = plt.subplots(2, 1, figsize=(16, 12), sharex=True)
+    fig.set_facecolor('#f5f5f5')  # Light grey background color
+
+    # Plot for increased prices
+    sns.barplot(
+        ax=axes[0],
+        data=increases_df,
+        x='percentage_change',
+        y='product',
+        dodge=False,
+        palette='viridis'
+    )
+    import datetime
+    time_stamp = datetime.datetime.today().date().strftime(format = '%b %d, %Y')
+    axes[0].set_title(f"Most Extreme Weekly Price Increases as of {time_stamp} - {city.replace('_',' ').title()}", 
+                    fontsize=16, weight='bold')
+    axes[0].set_xlabel('Percentage Change in Price (%)', fontsize=14)
+    axes[0].set_ylabel('Product', fontsize=14)
+
+    # Plot for decreased prices
+    sns.barplot(
+        ax=axes[1],
+        data=decreases_df,
+        x='percentage_change',
+        y='product',
+        dodge=False,
+        palette='magma'
+    )
+    axes[1].set_title(f"Most Extreme Weekly Price Decreases as of {time_stamp} - {city.replace('_',' ').title()}", 
+                    fontsize=16, weight='bold')
+    axes[1].set_xlabel('Percentage Change in Price (%)', fontsize=14)
+    axes[1].set_ylabel('Product', fontsize=14)
+
+    # Adjust layout for readability
+    plt.tight_layout()
+
+    # Display the plot using Streamlit
+    st.pyplot(fig)
+
+    # Save the plot to a BytesIO buffer to allow users to download it as a PNG file
+    buf = BytesIO()
+    fig.savefig(buf, format="png")
+    buf.seek(0)
+
+    # Add a download button for the plot
+    st.download_button(
+        label="Download Plot as PNG",
+        data=buf,
+        file_name="price_changes_plot_{city}.png",
+        mime="image/png"
+    )   

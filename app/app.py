@@ -43,7 +43,7 @@ visualization_type = st.sidebar.radio(
     #  "Price Extremes and Anomalies",
      "Product Affordability",
      "Marketplaces Exploration", 
-    #  "Seasonal Descomposition"
+     "Greatest Price Changes"
     #  "Relationship Between Prices and Trends" 
 	)
 )
@@ -225,6 +225,7 @@ if visualization_type =='Seasonal Descomposition':
                                         city = city)
 
 if visualization_type == 'Product Affordability':
+
     category_list= queries.category_query()
     category_list = [category.title().replace('_',' ') for category in category_list['category'].to_list()]
 
@@ -237,13 +238,58 @@ if visualization_type == 'Product Affordability':
     cities_list = [city.title().replace('_',' ') for city in cities['ciudad'].to_list()]
     city = st.selectbox("City of interest", 
                                 cities_list)
-    city = city.lower().replace(' ','_')
+    # city = city.lower().replace(' ','_')
     dataframe = queries.affordability_category_by_city(category = category,
                                                        city = city)
     visuals.plot_product_affordability_rank(dataframe = dataframe, 
                                             category = category,
                                             city = city)
     
+if visualization_type == 'Greatest Price Changes':
+    
+    # visual_type = st.radio(
+    # "Would you like to see overall products or products by category?",
+    # ["Overall", "By Category", ],)
+    
+    # if visual_type == "Overall":
+    
+    #     cities = queries.city_query()
+
+    #     cities_list = [city.title().replace('_',' ') for city in cities['ciudad'].to_list()]
+    #     city = st.selectbox("City of interest", 
+    #                                 cities_list)
+    #     city = city.lower().replace(' ','_')
+    #     dataframe = queries.major_price_changes_city_query(city=city)
+    #     visuals.greatest_price_changes(dataframe = dataframe, 
+    #                                 city = city)
+    
+    # if visual_type == "By Category":
+    ## This visual is aimed to show information by city
+    cities = queries.city_query()
+
+    cities_list = [city.title().replace('_',' ') for city in cities['ciudad'].to_list()]
+    city = st.selectbox("City of interest", 
+                                    cities_list)
+    city = city.lower().replace(' ','_')
+    ## Once city info is provided, the category is introduced
+    category_list= queries.category_query()
+    category_list = [category.title().replace('_',' ') for category in  category_list['category'].to_list()]
+
+    category = st.selectbox("Product of interest", 
+                            category_list)
+    
+    category = category.lower().replace(' ','_')
+    dataframe = queries.major_price_changes_city_query(city=city, 
+                                                           category = category)
+    
+    visuals.greatest_price_changes(dataframe = dataframe, 
+                                    city = city)
+    
+
+
+
+
+
 # Footer
 st.sidebar.write("SIPSA project APP - Streamlit")
 
