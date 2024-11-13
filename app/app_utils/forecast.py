@@ -9,7 +9,6 @@ from datetime import timedelta, datetime
 import streamlit as st
 from io import BytesIO
 from prophet.plot import plot_plotly, plot_components_plotly
-import plotly.graph_objs as go
 
 def remove_timezone(dt):
     return dt.replace(tzinfo=None)
