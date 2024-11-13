@@ -140,7 +140,7 @@ RDS_PASSWORD=your_rds_password
 ### **1. Running the Data Pipeline Locally**
 To execute the entire data pipeline and automate data ingestion, run:
 ```bash
-python -m src.ProcessHandler
+python main.py
 ```
 This will start the scraping process, download weekly reports, clean and validate the data, and insert it into the PostgreSQL database.
 

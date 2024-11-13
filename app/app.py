@@ -88,7 +88,6 @@ How to Navigate:
                 """)
 
     dataframe = queries.city_composition_query()
-
     visuals.city_composition_visualization(dataframe = dataframe)
 
     dataframe = queries.category_composition_query()
@@ -131,7 +130,11 @@ if visualization_type == 'Price Trends Across Time':
 									title = f"Price Evolution by Category ({city.title().replace('_',' ')})",                   
 									xlabel = '', 
 									ylabel = 'Average Price')
-
+      st.markdown("""
+    ---
+    
+    *SIPSApp - Colombian Food Prices.*
+    """)
 
 if visualization_type ==  "Individual Products":
      visual_type = st.radio(
@@ -168,7 +171,11 @@ if visualization_type ==  "Individual Products":
         visuals.plot_product_seasonal_trends(dataframe=dataframe, 
                                             product = product.title().replace('_',' '), 
                                             cities = cities)
-        
+        st.markdown("""
+    ---
+    
+    *SIPSApp - Colombian Food Prices.*
+    """)
 
 if visualization_type =='Marketplaces Exploration':
 
@@ -189,6 +196,12 @@ if visualization_type =='Marketplaces Exploration':
         category = category.lower().replace(' ','_')
         visuals.plot_price_distribution(dataframe = dataframe, 
                                         category = category)
+        st.markdown("""
+    ---
+    
+    *SIPSApp - Colombian Food Prices.*
+    """)
+
 
     else: 
         products_list= queries.product_query()
@@ -201,6 +214,12 @@ if visualization_type =='Marketplaces Exploration':
         dataframe = queries.marketplaces_product_dynamics_query(product = product)
         visuals.plot_price_distribution(dataframe = dataframe, 
                                         product = product)
+        st.markdown("""
+    ---
+    
+    *SIPSApp - Colombian Food Prices.*
+    """)
+
 
 if visualization_type =='Seasonal Descomposition':
     cities = queries.city_query()
@@ -223,6 +242,13 @@ if visualization_type =='Seasonal Descomposition':
     visuals.plot_seasonal_decomposition(dataframe = dataframe, 
                                         product = product, 
                                         city = city)
+    
+    st.markdown("""
+    ---
+    
+    *SIPSApp - Colombian Food Prices.*
+    """)
+
 
 if visualization_type == 'Product Affordability':
 
@@ -244,6 +270,12 @@ if visualization_type == 'Product Affordability':
     visuals.plot_product_affordability_rank(dataframe = dataframe, 
                                             category = category,
                                             city = city)
+    st.markdown("""
+    ---
+    
+    *SIPSApp - Colombian Food Prices.*
+    """)
+
     
 if visualization_type == 'Greatest Price Changes':
     
@@ -284,7 +316,12 @@ if visualization_type == 'Greatest Price Changes':
     
     visuals.greatest_price_changes(dataframe = dataframe, 
                                     city = city)
+    st.markdown("""
+    ---
     
+    *SIPSApp - Colombian Food Prices.*
+    """)
+
 
 
 
