@@ -7,3 +7,5 @@ psycopg2-binary==2.9.10
 statsmodels==0.14.4
 boto3==1.35.29
 python-dotenv==1.0.1
+holidays==0.24
+prophet==1.1.2

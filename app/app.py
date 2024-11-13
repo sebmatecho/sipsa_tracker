@@ -3,10 +3,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from app_utils import visualizations as visuals
-from app_utils import queries 
+from app_utils import queries, forecast
 from pathlib import Path
 from PIL import Image
-
 
 
 
@@ -43,8 +42,9 @@ visualization_type = st.sidebar.radio(
     #  "Price Extremes and Anomalies",
      "Product Affordability",
      "Marketplaces Exploration", 
-     "Greatest Price Changes"
+     "Greatest Price Changes",
     #  "Relationship Between Prices and Trends" 
+    "forecasting food prices"
 	)
 )
 
@@ -322,10 +322,42 @@ if visualization_type == 'Greatest Price Changes':
     *SIPSApp - Colombian Food Prices.*
     """)
 
+if visualization_type == 'forecasting food prices':
+
+    
+    # cities = queries.city_query()
+    cities = ['bogota','medellin','barranquilla','cali','cucuta',
+              'pereira','bucaramanga','ibague','monteria',
+               'villavicencio','valledupar','cartagena','popayan',
+                'tulua','manizales','palmira','neiva','sincelejo',
+                 'pasto','tunja','cartago','buenventura','pamplona',
+                  'armenia' ]
+    cities_list = [city.title().replace('_',' ') for city in cities]#['ciudad'].to_list()]
+    city = st.selectbox("City of interest", 
+                                    sorted(cities_list))
+    city = city.lower().replace(' ','_')
+
+    products = queries.product_query_by_city(cities = city)
+    products_list = [product.title().replace('_',' ') for product in products['product'].to_list()]
+    product = st.selectbox("Product of interest", 
+                                    products_list)
+    product = product.lower().replace(' ','_')
+
+    # steps = st.select_slider(
+    # "How many weeks ahead you want to forecast? ",
+    # options=list(range(0,53)),
+    # )
+    steps = 100
 
 
+    dataframe = queries.product_evolution_query_by_city(cities = city, 
+                                                    product = product)
 
-
+    forecast = forecast.forecast_price_for_product_city(dataframe = dataframe, 
+                                             city = city, 
+                                             product = product, 
+                                             steps = steps)
+    st.write(forecast)
 
 # Footer
 st.sidebar.write("SIPSA project APP - Streamlit")
