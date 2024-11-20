@@ -20,7 +20,7 @@ def forecast_price_for_product_city(dataframe,
 	df_filtered = dataframe[['date', 'avg_price']]
 	df_filtered.columns = ['ds', 'y']  
 	  
-	# remove timezone info - Prophet is picky AF
+	# remove timezone info - Prophet is picky 
 	df_filtered['ds'] = df_filtered['ds'].apply(remove_timezone)
 	# Initialize the Prophet model
 	model = Prophet(interval_width=0.95, yearly_seasonality=True, weekly_seasonality=False)
