@@ -3,10 +3,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from app_utils import visualizations as visuals
-from app_utils import queries, forecast
+from app_utils import queries, forecast, logging_setup
 from pathlib import Path
 from PIL import Image
 
+
+# Initialize logger
+logger, upload_log_to_s3 = logging_setup.setup_logger()
 
 
 # Set up Streamlit page configuration
@@ -19,13 +22,13 @@ st.set_page_config(
 
 # Main app content
 st.title("SIPSApp - Exploring Colombian Food Price Dynamics 🥑🍖📊")
-
+logger.info(f"App initialized.")
 
 
 
 # st.sidebar.image(sipsapp_logo, use_column_width=True)
 with st.sidebar.container():
-    img_path = Path().cwd()/'app'/'img'/'sipsapp2.png'
+    img_path = Path().cwd()/'img'/'sipsapp2.png'
     image = Image.open(img_path)
     st.image(image, use_column_width=True)
 # Sidebar
@@ -34,17 +37,17 @@ st.sidebar.header("SIPSApp Start! 🥑🍖📊")
 visualization_type = st.sidebar.radio(
     "Area of Interest",
     ("Hi, I'm SIPSApp! 👋", 
-     "Price Trends Across Time", 
-     "Individual Products",
+     "Overall Trends 📈", 
+     "Exploring Products 🍴",
     #  "City and Regional Comparisons", 
     #  "Category-Specific Trends",
     #  "Product Popularity and Trends",
     #  "Price Extremes and Anomalies",
-     "Product Affordability",
-     "Marketplaces Exploration", 
-     "Greatest Price Changes",
+     "Product Affordability 🌡",
+     "Exploring Marketplaces 🛒", 
+     "Greatest Price Changes 💣",
     #  "Relationship Between Prices and Trends" 
-    "forecasting food prices"
+    "Forecasting food prices 🔮"
 	)
 )
 
@@ -94,15 +97,14 @@ How to Navigate:
     visuals.category_composition_visualization(dataframe = dataframe)
 
     
-
+    logger.info(f"SIPSApp presentation explored")
     st.markdown("""
     ---
     
     *SIPSApp - Colombian Food Prices.*
     """)
 
-
-if visualization_type == 'Price Trends Across Time':
+if visualization_type == 'Overall Trends 📈':
       
       dataframe = queries.nation_wide_trend()
       visuals.lineplot_per_category_nationwide(dataframe=dataframe, 
@@ -111,7 +113,7 @@ if visualization_type == 'Price Trends Across Time':
                                                 title='Price Evolution by Category (Nationwide)',
                                                 xlabel='',
                                                 ylabel='Average Price')
-
+      logger.info(f"Overall Trends used")
 
 
       cities = queries.city_query()
@@ -130,13 +132,14 @@ if visualization_type == 'Price Trends Across Time':
 									title = f"Price Evolution by Category ({city.title().replace('_',' ')})",                   
 									xlabel = '', 
 									ylabel = 'Average Price')
+      logger.info(f"Overall Trends used for {city}")
       st.markdown("""
     ---
     
     *SIPSApp - Colombian Food Prices.*
     """)
 
-if visualization_type ==  "Individual Products":
+if visualization_type ==  "Exploring Products 🍴":
      visual_type = st.radio(
     "Would you like to see nation-wide trends or city-wide trends?",
     ["Nation-wide", "City-wide", ],
@@ -152,6 +155,7 @@ if visualization_type ==  "Individual Products":
         dataframe = queries.product_evolution_query(product = product)
         visuals.plot_product_seasonal_trends_national(dataframe=dataframe, 
                                             product = product.title().replace('_',' '))
+        logger.info(f"Exploring Products used for {product} - Nation-wide")
      else:
         cities = queries.city_query()
         cities_list = [city.title().replace('_',' ') for city in cities['ciudad'].to_list()]
@@ -171,13 +175,14 @@ if visualization_type ==  "Individual Products":
         visuals.plot_product_seasonal_trends(dataframe=dataframe, 
                                             product = product.title().replace('_',' '), 
                                             cities = cities)
+        logger.info(f"Exploring Products used for {product} in {cities}- City-wide")
         st.markdown("""
     ---
     
     *SIPSApp - Colombian Food Prices.*
     """)
 
-if visualization_type =='Marketplaces Exploration':
+if visualization_type =='Exploring Marketplaces 🛒':
 
     dataframe = queries.marketplace_count_query()
     visuals.plot_marketplace_count(dataframe = dataframe)
@@ -196,6 +201,7 @@ if visualization_type =='Marketplaces Exploration':
         category = category.lower().replace(' ','_')
         visuals.plot_price_distribution(dataframe = dataframe, 
                                         category = category)
+        logger.info(f"Exploring Marketplaces used for {category}")
         st.markdown("""
     ---
     
@@ -219,9 +225,8 @@ if visualization_type =='Marketplaces Exploration':
     
     *SIPSApp - Colombian Food Prices.*
     """)
-
-
-if visualization_type =='Seasonal Descomposition':
+        
+if visualization_type =='Seasonal Descomposition 📊':
     cities = queries.city_query()
 
     cities_list = [city.title().replace('_',' ') for city in cities['ciudad'].to_list()]
@@ -250,7 +255,7 @@ if visualization_type =='Seasonal Descomposition':
     """)
 
 
-if visualization_type == 'Product Affordability':
+if visualization_type == 'Product Affordability 🌡':
 
     category_list= queries.category_query()
     category_list = [category.title().replace('_',' ') for category in category_list['category'].to_list()]
@@ -270,6 +275,7 @@ if visualization_type == 'Product Affordability':
     visuals.plot_product_affordability_rank(dataframe = dataframe, 
                                             category = category,
                                             city = city)
+    logger.info(f"Product Affordability used for {category} in {city}")
     st.markdown("""
     ---
     
@@ -277,7 +283,7 @@ if visualization_type == 'Product Affordability':
     """)
 
     
-if visualization_type == 'Greatest Price Changes':
+if visualization_type == 'Greatest Price Changes 💣':
     
     # visual_type = st.radio(
     # "Would you like to see overall products or products by category?",
@@ -316,13 +322,14 @@ if visualization_type == 'Greatest Price Changes':
     
     visuals.greatest_price_changes(dataframe = dataframe, 
                                     city = city)
+    logger.info(f"Greatest Price Changes used for {category} in {city}")
     st.markdown("""
     ---
     
     *SIPSApp - Colombian Food Prices.*
     """)
 
-if visualization_type == 'forecasting food prices':
+if visualization_type == 'Forecasting food prices 🔮':
 
     
     # cities = queries.city_query()
@@ -336,12 +343,13 @@ if visualization_type == 'forecasting food prices':
     city = st.selectbox("City of interest", 
                                     sorted(cities_list))
     city = city.lower().replace(' ','_')
-
+    
     products = queries.product_query_by_city(cities = city)
     products_list = [product.title().replace('_',' ') for product in products['product'].to_list()]
     product = st.selectbox("Product of interest", 
                                     products_list)
     product = product.lower().replace(' ','_')
+
 
     # steps = st.select_slider(
     # "How many weeks ahead you want to forecast? ",
@@ -349,7 +357,7 @@ if visualization_type == 'forecasting food prices':
     # )
     steps = 100
 
-
+    logger.info(f"Forecasting food prices used for {product} in {city}")
     dataframe = queries.product_evolution_query_by_city(cities = city, 
                                                     product = product)
 
@@ -360,9 +368,9 @@ if visualization_type == 'forecasting food prices':
     st.write(forecast)
 
 # Footer
-st.sidebar.write("SIPSA project APP - Streamlit")
+st.sidebar.write("SIPSApp - Exploring Colombian Food Prices")
 
-
+upload_log_to_s3()
 # Footer
 st.markdown("<hr>", unsafe_allow_html=True)
 st.markdown(
