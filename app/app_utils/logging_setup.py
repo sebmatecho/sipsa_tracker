@@ -6,7 +6,6 @@ import boto3
 from dotenv import load_dotenv
 import os
 
-# Configure logging
 def setup_logger(s3_key_prefix: str = "app_logs/"):
     """
     Sets up and configures a logger for the application.
