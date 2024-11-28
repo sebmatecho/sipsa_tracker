@@ -47,7 +47,7 @@ visualization_type = st.sidebar.radio(
      "Exploring Marketplaces 🛒", 
      "Greatest Price Changes 💣",
     #  "Relationship Between Prices and Trends" 
-    "Forecasting food prices 🔮"
+    "Forecasting Food Prices 🔮"
 	)
 )
 
@@ -329,7 +329,7 @@ if visualization_type == 'Greatest Price Changes 💣':
     *SIPSApp - Colombian Food Prices.*
     """)
 
-if visualization_type == 'Forecasting food prices 🔮':
+if visualization_type == 'Forecasting Food Prices 🔮':
 
     
     # cities = queries.city_query()
