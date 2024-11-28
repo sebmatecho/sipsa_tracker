@@ -38,8 +38,8 @@ def setup_logger(s3_key_prefix: str = "app_logs/"):
         Nov 28, 2024. 
     """
     load_dotenv()
-    aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID']
-    aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY']
+    aws_access_key_id = os.environ['aws_access_key_id']
+    aws_secret_access_key = os.environ['aws_secret_access_key']
     bucket_name = os.environ['BUCKET_NAME']
     
     # Creating boto3 session (access the S3 bucket)
