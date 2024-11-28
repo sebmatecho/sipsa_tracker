@@ -28,7 +28,7 @@ logger.info(f"App initialized.")
 
 # st.sidebar.image(sipsapp_logo, use_column_width=True)
 with st.sidebar.container():
-    img_path = Path().cwd()/'img'/'sipsapp2.png'
+    img_path = Path().cwd()/'app'/'img'/'sipsapp2.png'
     image = Image.open(img_path)
     st.image(image, use_column_width=True)
 # Sidebar
