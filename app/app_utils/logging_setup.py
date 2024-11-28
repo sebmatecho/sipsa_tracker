@@ -1,4 +1,3 @@
-
 import logging
 import sys
 from pathlib import Path
@@ -28,7 +27,7 @@ def setup_logger(s3_key_prefix: str = "app_logs/"):
         - Log Levels: Both console and file handlers are set to `INFO`.
         - Handlers:
             - Console (`stdout`) Handler: Outputs logs to the console.
-            - File Handler: Outputs logs to 'sipsa_process.log' with overwrite mode (`mode='w'`).
+            - File Handler: Outputs logs to 'sipsa_process.log' with append mode (`mode='a'`).
     
     Example Usage:
         >>> logger = setup_logger()
@@ -44,25 +43,22 @@ def setup_logger(s3_key_prefix: str = "app_logs/"):
     
     # Creating boto3 session (access the S3 bucket)
     s3 = boto3.resource('s3',
-                        aws_access_key_id = aws_access_key_id, 
-                        aws_secret_access_key = aws_secret_access_key)
+                        aws_access_key_id=aws_access_key_id, 
+                        aws_secret_access_key=aws_secret_access_key)
 
-    
     # Create logfile path
-    log_path = Path.cwd()/'app_logs'
+    log_path = Path.cwd() / 'app_logs'
     if not log_path.exists():
         print(f'{log_path} created successfully')
-        log_path.mkdir(parents = True, 
-                   exist_ok = True)
+        log_path.mkdir(parents=True, exist_ok=True)
         
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
 
     # Create handlers
-    today_date = datetime.today().strftime(format = '%m_%d_%Y')
     c_handler = logging.StreamHandler(sys.stdout)
-    file_name = f'sipsapp_usage_{today_date}.log'
-    f_handler = logging.FileHandler(log_path/file_name, mode='w')
+    file_name = f'sipsapp_usage.log'
+    f_handler = logging.FileHandler(log_path / file_name, mode='a')
 
     # Set levels
     c_handler.setLevel(logging.ERROR)
@@ -73,19 +69,23 @@ def setup_logger(s3_key_prefix: str = "app_logs/"):
     c_handler.setFormatter(formatter)
     f_handler.setFormatter(formatter)
 
-    # Add handlers to the logger
-    logger.addHandler(c_handler)
-    logger.addHandler(f_handler)
+    # Check if handlers already exist, to prevent adding them multiple times
+    if not logger.hasHandlers():
+        # Add handlers to the logger
+        logger.addHandler(c_handler)
+        logger.addHandler(f_handler)
     
-    def upload_log_to_s3(bucket_name = bucket_name, 
-                         s3 = s3, 
-                         file_name = file_name):
-        logger.info(f"Uploading log file  to S3 bsucket {s3}")
+    def upload_log_to_s3(bucket_name=bucket_name, 
+                         s3=s3, 
+                         file_name=file_name):
+        logger.info(f"Uploading log file to S3 bucket {s3}")
         try:
             with open(f'app_logs/{file_name}', "rb") as f:
-                 s3.Bucket(bucket_name).put_object(Key=s3_key_prefix + file_name, Body=f)
-            logger.info(f"Log file uploaded to S3: s3://{s3}/{s3_key_prefix}{file_name}")
+                s3.Bucket(bucket_name).put_object(Key=s3_key_prefix + file_name, Body=f)
+            logger.info(f"Log file uploaded to S3: s3://{bucket_name}/{s3_key_prefix}{file_name}")
         except Exception as e:
             logger.error(f"Failed to upload log file to S3: {e}")
+
     # Return the logger and upload function
     return logger, upload_log_to_s3
+
