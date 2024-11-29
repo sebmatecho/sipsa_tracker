@@ -6,15 +6,22 @@ from app_utils import visualizations as visuals
 from app_utils import queries, forecast, logging_setup
 from pathlib import Path
 from PIL import Image
-
 import uuid
-
 
 # Initialize logger
 logger, upload_log_to_s3 = logging_setup.setup_logger()
 
-session_id = str(uuid.uuid4())
-logger.info(f"Session {session_id} started for user.")
+# Assign unique session ID and track initialization
+if "session_id" not in st.session_state:
+    st.session_state["session_id"] = str(uuid.uuid4())
+    st.session_state["initialized"] = False
+
+session_id = st.session_state["session_id"]
+
+# Log session initialization
+if not st.session_state["initialized"]:
+    logger.info(f"Session {session_id} started for user.")
+    st.session_state["initialized"] = True
 
 # Set up Streamlit page configuration
 st.set_page_config(
@@ -23,23 +30,45 @@ st.set_page_config(
     layout="wide",
 )
 
+# Log app initialization only once
+if "app_initialized" not in st.session_state:
+    logger.info("App initialized.")
+    st.session_state["app_initialized"] = True
 
 # Main app content
-st.title("SIPSApp - Exploring Colombian Food Price Dynamics 🥑🍖📊")
-logger.info(f"App initialized.")
+st.title("SIPSApp - Exploring Colombian Food Price Dynamics 🥑🐖📊")
 
+# Cached function for loading data
+@st.cache_data
+def get_city_composition_data():
+    return queries.city_composition_query()
 
+@st.cache_data
+def get_category_composition_data():
+    return queries.category_composition_query()
 
-# st.sidebar.image(sipsapp_logo, use_column_width=True)
-try: 
+# Use the cached data to display a visualization
+if "city_composition_displayed" not in st.session_state:
+    dataframe = get_city_composition_data()
+    visuals.city_composition_visualization(dataframe=dataframe)
+    st.session_state["city_composition_displayed"] = True
+
+if "category_composition_displayed" not in st.session_state:
+    dataframe = get_category_composition_data()
+    visuals.category_composition_visualization(dataframe=dataframe)
+    st.session_state["category_composition_displayed"] = True
+
+# Sidebar setup (images, options, etc.)
+try:
     with st.sidebar.container():
-        img_path = Path().cwd()/'app'/'img'/'sipsapp2.png'
+        img_path = Path().cwd() / 'app' / 'img' / 'sipsapp2.png'
         image = Image.open(img_path)
         st.image(image, use_column_width=True)
-except: 
+except:
     None
-# Sidebar
-st.sidebar.header("SIPSApp Start! 🥑🍖📊")
+
+# Sidebar header
+st.sidebar.header("SIPSApp Start! 🥑🐖📊")
 
 visualization_type = st.sidebar.radio(
     "Area of Interest",
@@ -57,7 +86,9 @@ visualization_type = st.sidebar.radio(
     "Forecasting Food Prices 🔮"
 	)
 )
-
+if "last_visualization_type" not in st.session_state or st.session_state["last_visualization_type"] != visualization_type:
+    logger.info(f"User selected visualization: {visualization_type}")
+    st.session_state["last_visualization_type"] = visualization_type
 
 # Content for the Introduction tab
 if visualization_type == "Hi, I'm SIPSApp! 👋":
