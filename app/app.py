@@ -16,10 +16,14 @@ if "session_id" not in st.session_state:
     st.session_state["session_id"] = str(uuid.uuid4())
     st.session_state["initialized"] = False
 
+# Use st.session_state to generate and persist session ID across reruns
+if "session_id" not in st.session_state:
+    st.session_state["session_id"] = str(uuid.uuid4())
+
 session_id = st.session_state["session_id"]
 
 # Log session initialization
-if not st.session_state["initialized"]:
+if not st.session_state.get("initialized", False):
     logger.info(f"Session {session_id} started for user.")
     st.session_state["initialized"] = True
 
@@ -69,6 +73,7 @@ except:
 
 # Sidebar header
 st.sidebar.header("SIPSApp Start! 🥑🐖📊")
+
 
 visualization_type = st.sidebar.radio(
     "Area of Interest",
