@@ -7,10 +7,14 @@ from app_utils import queries, forecast, logging_setup
 from pathlib import Path
 from PIL import Image
 
+import uuid
+
 
 # Initialize logger
 logger, upload_log_to_s3 = logging_setup.setup_logger()
 
+session_id = str(uuid.uuid4())
+logger.info(f"Session {session_id} started for user.")
 
 # Set up Streamlit page configuration
 st.set_page_config(
@@ -27,10 +31,13 @@ logger.info(f"App initialized.")
 
 
 # st.sidebar.image(sipsapp_logo, use_column_width=True)
-with st.sidebar.container():
-    img_path = Path().cwd()/'app'/'img'/'sipsapp2.png'
-    image = Image.open(img_path)
-    st.image(image, use_column_width=True)
+try: 
+    with st.sidebar.container():
+        img_path = Path().cwd()/'app'/'img'/'sipsapp2.png'
+        image = Image.open(img_path)
+        st.image(image, use_column_width=True)
+except: 
+    None
 # Sidebar
 st.sidebar.header("SIPSApp Start! 🥑🍖📊")
 
@@ -322,7 +329,7 @@ if visualization_type == 'Greatest Price Changes 💣':
     
     visuals.greatest_price_changes(dataframe = dataframe, 
                                     city = city)
-    logger.info(f"Greatest Price Changes used for {category} in {city}")
+    logger.info(f"Greatest Price Changes used fcor {category} in {city}")
     st.markdown("""
     ---
     
