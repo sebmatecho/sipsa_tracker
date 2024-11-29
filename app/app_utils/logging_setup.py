@@ -42,7 +42,6 @@ def setup_logger(s3_key_prefix: str = "app_logs/"):
     executor = ThreadPoolExecutor(max_workers=1)
 
     def upload_log_to_s3():
-        logger.info(f"Uploading log file to S3 bucket {bucket_name}")
         try:
             with open(log_path / file_name, "rb") as f:
                 s3.Bucket(bucket_name).put_object(Key=s3_key_prefix + file_name, Body=f)
