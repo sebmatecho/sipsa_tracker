@@ -27,3 +27,35 @@
 2024-11-29 12:02:04,599 - INFO - Forecasting food prices used for apple_mango in armenia
 2024-11-29 12:02:12,983 - INFO - Uploading log file to S3 bucket s3.ServiceResource()
 2024-11-29 12:02:13,554 - INFO - Log file uploaded to S3: s3://sipsa-bucket/app_logs/sipsapp_usage.log
+2025-01-10 16:58:43,341 - INFO - Session 8ec496e8-6d82-4b15-a547-26f34eb00641 started for user.
+2025-01-10 16:58:43,445 - INFO - App initialized.
+2025-01-10 17:07:08,406 - INFO - Overall Trends used
+2025-01-10 17:07:22,175 - INFO - Overall Trends used
+2025-01-10 17:07:29,288 - INFO - Overall Trends used for barranquilla
+2025-01-10 17:07:29,553 - INFO - Log file uploaded to S3: s3://sipsa-bucket/app_logs/sipsapp_usage.log
+2025-01-10 17:07:40,710 - INFO - Exploring Products used for coffee_growers_green_harton_plantain - Nation-wide
+2025-01-10 17:07:41,048 - INFO - Log file uploaded to S3: s3://sipsa-bucket/app_logs/sipsapp_usage.log
+2025-01-10 17:08:08,772 - INFO - Exploring Products used for antioqueno_chonto_tomato in ['bogota', 'barranquilla', 'cali', 'cartagena', 'manizales', 'medellin']- City-wide
+2025-01-10 17:08:09,213 - INFO - Log file uploaded to S3: s3://sipsa-bucket/app_logs/sipsapp_usage.log
+2025-01-10 17:08:27,618 - INFO - Exploring Products used for chicken_legs in ['bogota', 'barranquilla', 'cali', 'cartagena', 'manizales', 'medellin']- City-wide
+2025-01-10 17:08:28,692 - INFO - Log file uploaded to S3: s3://sipsa-bucket/app_logs/sipsapp_usage.log
+2025-01-10 17:20:01,711 - INFO - Product Affordability used for fish in Ancuya
+2025-01-10 17:20:03,163 - INFO - Log file uploaded to S3: s3://sipsa-bucket/app_logs/sipsapp_usage.log
+2025-01-10 17:20:10,159 - INFO - Product Affordability used for fish in Bogota
+2025-01-10 17:20:13,627 - INFO - Log file uploaded to S3: s3://sipsa-bucket/app_logs/sipsapp_usage.log
+2025-01-10 17:20:20,605 - INFO - Product Affordability used for fresh_fruits in Bogota
+2025-01-10 17:20:20,810 - INFO - Log file uploaded to S3: s3://sipsa-bucket/app_logs/sipsapp_usage.log
+2025-01-12 12:41:32,295 - INFO - Session 2d9a495d-eea4-4b8e-9a4f-fae7884f328a started for user.
+2025-01-12 12:41:32,303 - INFO - App initialized.
+2025-01-12 12:42:17,200 - INFO - Product Affordability used for fish in Bogota
+2025-01-12 12:42:18,436 - INFO - Log file uploaded to S3: s3://sipsa-bucket/app_logs/sipsapp_usage.log
+2025-01-12 12:42:44,208 - INFO - Greatest Price Changes used fcor fish in armenia
+2025-01-12 12:42:44,414 - INFO - Log file uploaded to S3: s3://sipsa-bucket/app_logs/sipsapp_usage.log
+2025-01-12 12:42:55,525 - INFO - Greatest Price Changes used fcor vegetables in armenia
+2025-01-12 12:42:55,722 - INFO - Log file uploaded to S3: s3://sipsa-bucket/app_logs/sipsapp_usage.log
+2025-01-12 12:43:04,203 - INFO - Greatest Price Changes used fcor vegetables in bogota
+2025-01-12 12:43:04,576 - INFO - Log file uploaded to S3: s3://sipsa-bucket/app_logs/sipsapp_usage.log
+2025-01-12 12:51:44,171 - INFO - Greatest Price Changes used fcor meats in bogota
+2025-01-12 12:51:44,626 - INFO - Log file uploaded to S3: s3://sipsa-bucket/app_logs/sipsapp_usage.log
+2025-01-12 12:51:53,666 - INFO - Greatest Price Changes used fcor eggs_dairy in bogota
+2025-01-12 12:51:53,867 - INFO - Log file uploaded to S3: s3://sipsa-bucket/app_logs/sipsapp_usage.log

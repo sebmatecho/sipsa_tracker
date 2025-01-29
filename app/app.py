@@ -84,7 +84,7 @@ visualization_type = st.sidebar.radio(
     #  "Category-Specific Trends",
     #  "Product Popularity and Trends",
     #  "Price Extremes and Anomalies",
-     "Product Affordability 🌡",
+    #  "Product Affordability 🌡",
      "Exploring Marketplaces 🛒", 
      "Greatest Price Changes 💣",
     #  "Relationship Between Prices and Trends" 
@@ -308,13 +308,16 @@ if visualization_type == 'Product Affordability 🌡':
     
     category = category.lower().replace(' ','_')
     cities = queries.city_query()
-
+    
     cities_list = [city.title().replace('_',' ') for city in cities['ciudad'].to_list()]
     city = st.selectbox("City of interest", 
                                 cities_list)
     # city = city.lower().replace(' ','_')
     dataframe = queries.affordability_category_by_city(category = category,
                                                        city = city)
+    
+    st.dataframe(dataframe)
+    
     visuals.plot_product_affordability_rank(dataframe = dataframe, 
                                             category = category,
                                             city = city)
